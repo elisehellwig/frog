@@ -20,10 +20,6 @@ nv <- shapefile(file.path(datapath,
                           'cathy/rasi_streams/NHDflowlineGB_Streams_Final_withRASI.shp'))
 
 
-#importing extracted data
-x <- read.table(file.path(datapath, 'cathy/rasi_mxt_allstr3.tab'), sep='\t',
-                header=TRUE)
-
 #########################################################
 #adding state variable
 ca$state <- 'CA'
@@ -42,11 +38,16 @@ names(nv) <- gsub("fdate_1", 'fdate', names(nv))
 fdatID <- which(names(nv)=='fdate_1')
 names(nv)[fdatID] <- 'fdate'
 
+
+
 #getting all the columns both sets of data have
 varnames <- intersect(names(ca), names(nv))
 
+nvMerge <- nv[, varnames]
+caMerge <- ca[, varnames]
+
 #merging the datasets with only the columns they share
-streams <- merge(ca[, varnames],nv[, varnames])
+streams <- rbind(nvMerge, caMerge)
 
 names(streams) <- gsub("_prese", '', names(streams))
 
