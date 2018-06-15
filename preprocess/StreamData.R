@@ -1,5 +1,5 @@
 #######################Data Prep######################
-## this script imports the stream and processes it for analysis.
+## this script imports the CA and NV data and merges it.
 
 ###############Setup##############
 library(raster)
