@@ -14,9 +14,10 @@ datapath <- '/Users/echellwig/Research/frogData/data/'
 source(file.path(funpath, 'qc.R'))
 
 #importing spatial streams data
-ca <- shapefile(file.path(datapath, 'frog_model/NHDFlowline_Streams_Final.shp'))
+ca <- shapefile(file.path(datapath,
+                          'cathy/rasi_streams/NHDflowline_Streams_Final_withRASI.shp'))
 nv <- shapefile(file.path(datapath, 
-                          'frog_model/NHDFlowlineGB_Streams_Final.shp'))
+                          'cathy/rasi_streams/NHDflowlineGB_Streams_Final_withRASI.shp'))
 
 
 #importing extracted data
@@ -26,7 +27,7 @@ x <- read.table(file.path(datapath, 'cathy/rasi_mxt_allstr3.tab'), sep='\t',
 #########################################################
 #adding state variable
 ca$state <- 'CA'
-ca$state <- 'NV'
+nv$state <- 'NV'
 
 
 #converting all names to lower case
@@ -35,7 +36,7 @@ names(nv) <- tolower(names(nv))
 
 #removing underscores for consistency when merging
 names(ca) <- gsub("ppt_q","pptq", names(ca))
-
+names(nv) <- gsub("fdate_1", 'fdate', names(nv))
 
 #renaming this col so they are the same in both datasets
 fdatID <- which(names(nv)=='fdate_1')
@@ -47,7 +48,17 @@ varnames <- intersect(names(ca), names(nv))
 #merging the datasets with only the columns they share
 streams <- merge(ca[, varnames],nv[, varnames])
 
+names(streams) <- gsub("_prese", '', names(streams))
+
+streams$fcode <- recode(streams$fcode, `46006`='perennial', 
+                        `46003`='intermittent', `46000`='other')
+
+
+#removing the column 'comid_12'
+c12_ID <- which(names(streams)=='comid_12')
+streamsfinal <- streams[,-c12_ID]
+
 #saving the spatiallinesdataframe to to a smaller file type
-saveRDS(streams, file.path(datapath, 'processed/streamsGEO.RDS'))
+saveRDS(streamsfinal, file.path(datapath, 'processed/streamsGEO.RDS'))
 
 
