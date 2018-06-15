@@ -17,3 +17,16 @@ isIdentical <- function(x, y) {
     
     return(isID)
 }
+
+
+convname <- function(object, from, to) {
+    
+    onames <- names(object)
+    
+    nm_id <- which(onames==from)
+    
+    onames[nm_id] <- to
+    
+    return(onames)
+    
+}
