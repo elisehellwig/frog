@@ -24,6 +24,10 @@ x <- read.table(file.path(datapath, 'cathy/rasi_mxt_allstr3.tab'), sep='\t',
                 header=TRUE)
 
 #########################################################
+#adding state variable
+ca$state <- 'CA'
+ca$state <- 'NV'
+
 
 #converting all names to lower case
 names(ca) <- tolower(names(ca))
