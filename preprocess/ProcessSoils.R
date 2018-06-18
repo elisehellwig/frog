@@ -3,26 +3,36 @@
 library(tidyverse)
 library(raster)
 library(rgdal)
+library(rgeos)
 library(foreign)
 
 datapath <- '/Users/echellwig/Research/frogData/data/'
 
-soilca <- read.dbf(file.path(datapath, 'cathy/soils/soil_intersect3.dbf'),
-                   as.is=TRUE)
-soilnv <-  read.dbf(file.path(datapath, 'cathy/soils/soil_intersectgb.dbf'),
-                    as.is=TRUE)
+soil <- shapefile(file.path(datapath, 
+                'frog_model/data/output/MergedSoilsClipFinal.shp'))
 
-geo <- readRDS(file.path(datapath, 'processed/streamsGEO.RDS'))
+ras <- readRDS(file.path(datapath, 'processed/RasiStreamLines.RDS'))
 
 #########################################################
 
-soilca$state <- 'CA'
-soilnv$state <- 'NV'
+soill <- spTransform(soil, crs(ras))
+soilorder <- soill[,'SoilOrderD']
 
-varnames <- intersect(names(soilca), names(soilnv))
+soilagg <- aggregate(soill)
+geodif <- gDifference(ras, soilagg, byid=TRUE)
+
+rasSoil <- over(ras, soilorder, returnList = TRUE)
+
+rs <- sapply(rasSoil, function(rs) rs$SoilOrderD)
+rsNA <- sapply(rs, function(v) getMode(v))
+
+rasSoilvec <- sapply(rasSoil, function(rs) getMode(rs$SoilOrderD))
 
 soil <- rbind(soilca[, varnames], soilnv[,varnames])
 
-geosoil <- merge(geo, soil, by.x='comid','NHDFlowlin')
+#removing rows from soil that dont exist in ras
+
+
+RasiSoil <- merge(ras, soil, by.x='comid',by.y='NHDFlowlin')
 
 
