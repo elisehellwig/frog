@@ -15,11 +15,11 @@ source(file.path(funpath, 'qc.R'))
 
 #importing spatial streams data
 ca <- shapefile(file.path(datapath,
-                          'cathy/rasi_streams/NHDflowline_Streams_Final_withRASI.shp'))
+            'cathy/rasi_streams/NHDflowline_Streams_Final_withRASI.shp'))
 nv <- shapefile(file.path(datapath, 
-                          'cathy/rasi_streams/NHDflowlineGB_Streams_Final_withRASI.shp'))
+            'cathy/rasi_streams/NHDflowlineGB_Streams_Final_withRASI.shp'))
 
-
+#importing cathy's data to see what we need
 #########################################################
 #adding state variable
 ca$state <- 'CA'
@@ -55,11 +55,16 @@ streams$fcode <- recode(streams$fcode, `46006`='perennial',
                         `46003`='intermittent', `46000`='other')
 
 
+#calculating stream reach length
+streams$length <- SpatialLinesLengths(streams)
+
+
 #removing the column 'comid_12'
 c12_ID <- which(names(streams)=='comid_12')
 streamsfinal <- streams[,-c12_ID]
 
 #saving the spatiallinesdataframe to to a smaller file type
 saveRDS(streamsfinal, file.path(datapath, 'processed/RasiStreamLines.RDS'))
+
 
 
