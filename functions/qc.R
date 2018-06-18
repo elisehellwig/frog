@@ -17,3 +17,29 @@ isIdentical <- function(x, y) {
     
     return(isID)
 }
+
+
+getMode <- function(x) {
+    
+    if (all(is.na(x))) {
+        mde <- NA
+        
+    } else if (length(x)==1) {
+        mde <- x 
+        
+    } else {
+        tab <- table(x)
+        mdeID <- which.max(tab)
+        mde <- attributes(tab)$dimnames[[1]][mdeID]
+        
+    }
+    
+    return(mde)
+}
+
+
+
+
+
+
+
