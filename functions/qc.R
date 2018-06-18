@@ -38,8 +38,17 @@ getMode <- function(x) {
 }
 
 
-
-
+overChr <- function(x, y, variable) {
+    require(rgeos)
+    
+    overlist <- over(x, y, returnList = TRUE)
+    
+    varlist <- sapply(overlist, function(ol) ol[,variable])
+    
+    most <- sapply(varlist, function(vl) getMode(vl))
+    
+    return(most)
+}
 
 
 
