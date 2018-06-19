@@ -13,14 +13,18 @@ datapath <- '/Users/echellwig/Research/frogData/data/'
 #importing functions
 source(file.path(funpath, 'preprocess.R'))
 
-#lots of non overlap with stream
-cwhr <- shapefile(file.path(datapath,
-            'frog_model/data/output/ChwrMerge.shp'))
+whrpath <- file.path(datapath, 
+                     'frog_model/data/datasets/cwhr_4Megan/CWHRVg.gdb')
 
-whrnames <- c("GBflowlineINTERSECTtnfcwhrpolygon.shp",
-              "NHDflowlineINTERSECTpnfcwhrpolygon.shp",
-              "NHDflowlineINTERSECTtnfcwhrpolygon.shp",
-              "lnfwhr.shp")
+whrlayers <- ogrListLayers(whrpath)
+attributes(whrlayers) <- NULL
+
+#ogrListLayers
+whrlist <- lapply(whrlayers, function(l) {
+    readOGR(dsn=whrpath, layer=l)
+}) 
+
+
 
 whrpaths <- paste('whr', whrnames, sep='/')
 whrlist <- lapply(whrpaths, function(fn) shapefile(file.path(datapath, fn)))
