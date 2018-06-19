@@ -24,10 +24,10 @@ whrlist <- lapply(whrlayers, function(l) {
     readOGR(dsn=whrpath, layer=l)
 }) 
 
+whrlistTA <- lapply()
 
-
-whrpaths <- paste('whr', whrnames, sep='/')
-whrlist <- lapply(whrpaths, function(fn) shapefile(file.path(datapath, fn)))
+# whrpaths <- paste('whr', whrnames, sep='/')
+# whrlist <- lapply(whrpaths, function(fn) shapefile(file.path(datapath, fn)))
 
 whrall <- do.call(bind, whrlist)
 whr <- aggregate(whrall)
