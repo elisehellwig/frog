@@ -13,8 +13,9 @@ __MergeStreams.R__ This script take the California Rasi data and the Nevada Rasi
 * Output files: processed/RasiStreamLines.RDS
 
 __ProcessDEM.R__ This script imports a 1/3 arc-second DEM from the USGS website (https://viewer.nationalmap.gov/basic/, with bounding box -121.8, -120, 39.1, 40.5), merges it to create one local DEM, and saves it to localDEM.grd. Then the script calculates slope and aspect from the DEM and saves it to streamGeography.grd.
-* Input files: *DEM/n40w120/floatn40w120_13.flt*, *DEM/n40w121/floatn40w121_13.flt*, *DEM/n40w122/floatn40w122_13.flt*, *DEM/n41w120/floatn41w120_13.flt*, *DEM/n41w121/floatn41w121_13.flt*, DEM/n41w122/floatn41w122_13.flt
-* Output files: processed/localDEM.grd, streamGeography.grd
+
+ * Input files: *DEM/n40w120/floatn40w120_13.flt*, *DEM/n40w121/floatn40w121_13.flt*, *DEM/n40w122/floatn40w122_13.flt*, *DEM/n41w120/floatn41w120_13.flt*, *DEM/n41w121/floatn41w121_13.flt*, DEM/n41w122/floatn41w122_13.flt
+ * Output files: processed/localDEM.grd, streamGeography.grd
 
 __ProcessSoils.R__ This script imports two soil datasets provided by previous people and merges it into one object. It then extracts soil type for each of the stream reaches. In case of a stream going through multiple soil types it takes the most common soil type (mode). There are still about 50 NAs in the soil data. I think we may need to go back to SSURGO to get the rest (or a CA specific dataset).
 * Input files: 
