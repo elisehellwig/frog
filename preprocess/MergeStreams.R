@@ -11,7 +11,7 @@ funpath <- '/Users/echellwig/Research/frog/functions/'
 datapath <- '/Users/echellwig/Research/frogData/data/'
 
 #importing functions
-source(file.path(funpath, 'qc.R'))
+source(file.path(funpath, 'preprocess.R'))
 
 #importing spatial streams data
 ca <- shapefile(file.path(datapath,
