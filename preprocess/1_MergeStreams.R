@@ -63,8 +63,11 @@ streams$length <- SpatialLinesLengths(streams)
 c12_ID <- which(names(streams)=='comid_12')
 streamsfinal <- streams[,-c12_ID]
 
+
 #saving the spatiallinesdataframe to to a smaller file type
 saveRDS(streamsfinal, file.path(datapath, 'processed/RasiStreamLines.RDS'))
 
-
+#Saving spatiallinesdataframe as as shapefile
+shapefile(streamsfinal, 
+          file.path(datapath, 'processed/shapefiles/RasiStreamLines'))
 
