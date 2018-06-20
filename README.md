@@ -43,9 +43,9 @@ __ProcessSoils.R__ UNDER CONSTRUCTION This script import a soil dataset provided
  * Output files:
 
 
-__CleanWHR.R__ UNDER CONSTRUCTION This script imports the CWHR data layer (frogData/data/frog_model/data/output/ChwrMerge.shp) and uses it to extract WHR and cover type. 
+__CleanWHR.R__ UNDER CONSTRUCTION This script imports three data layers from the CWHRVg and uses it to extract WHR and cover type. 
 
- * Input files: 
+ * Input files: frogData/data/frog_model/data/datasets/cwhr_4Megan/CWHRVg.gdb (all layers)
 	
  * Output files:
 
