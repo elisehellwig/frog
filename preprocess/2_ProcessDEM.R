@@ -2,6 +2,7 @@
 library(tidyverse)
 library(raster)
 library(rgdal)
+library(rgeos)
 
 datapath <- '/Users/echellwig/Research/frogData/data/'
 
