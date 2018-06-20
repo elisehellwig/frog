@@ -12,6 +12,15 @@ datapath <- '/Users/echellwig/Research/frogData/data/'
 
 #importing functions
 source(file.path(funpath, 'preprocess.R'))
+stream <- readRDS(file.path(datapath, 'processed/RasiStreamLines.RDS'))
+
+
+TA <- CRS('+proj=aea +lat_1=34 +lat_2=40.5 +lat_0=0 +lon_0=-120 +x_0=0 +y_0=-4000000 +ellps=GRS80 +datum=NAD83 +units=m +no_defs ')
+
+##################################################################
+##################################################################
+streamTA <- spTransform(stream, TA)
+streamExt <- extent(streamTA)
 
 whrpath <- file.path(datapath, 
                      'frog_model/data/datasets/cwhr_4Megan/CWHRVg.gdb')
@@ -21,43 +30,35 @@ attributes(whrlayers) <- NULL
 
 #ogrListLayers
 whrlist <- lapply(whrlayers, function(l) {
-    readOGR(dsn=whrpath, layer=l)
+    readOGR(dsn=whrpath, layer=l, stringsAsFactors = FALSE)
 }) 
 
-whrlistTA <- lapply()
+whrlistTA <- lapply(whrlist, function(spdf) {
+    crop(spTransform(spdf, TA), streamExt)
+    })
 
 # whrpaths <- paste('whr', whrnames, sep='/')
 # whrlist <- lapply(whrpaths, function(fn) shapefile(file.path(datapath, fn)))
 
-whrall <- do.call(bind, whrlist)
-whr <- aggregate(whrall)
+whr <- do.call(bind, whrlistTA)
+whrbuff <- gBuffer(whr, byid=TRUE, width=0)
 
-stream <- readRDS(file.path(datapath, 'processed/RasiStreamLines.RDS'))
+habitattype <- overChr(streamTA, whr, 'WHRTYPE')
+naIDs <- which(is.na(habitattype))
 
-(NAs <- length(which(is.na(stream$whrtype))))
-
-
-TA <- CRS('+proj=aea +lat_1=34 +lat_2=40.5 +lat_0=0 +lon_0=-120 +x_0=0 +y_0=-4000000 +datum=NAD83 +units=m +no_defs +ellps=GRS80 +towgs84=0,0,0 ')
-
-
-streamTA <- spTransform(stream, TA) 
-cwhrTA <- spTransform(cwhr, TA)
+missing <- streamTA[naIDs, ]
+missingWHR <- crop(whrbuff, extent(missing))
+streamTAmissing <- crop(streamTA, extent(missing))
+whrplot <- aggregate(missingWHR)
 
 
-cwhragg <- aggregate(cwhrTA)
-cwhrbuff <- gBuffer(cwhragg, byid=TRUE, width=0)
-
-
-outsideStreams <- gDifference(streamTA, cwhrbuff, byid=TRUE)
-
-plot(cwhragg, col='lightblue', main='Extent of Wildlife Habitat Relationship (WHR) Layers \n and Stream Locations, Red = ouside WHR extent')
-plot(streamTA, add=TRUE, col='navy')
-plot(outsideStreams, add=TRUE, col='red3')
+plot(missingWHR, col='lightblue', lwd=0.01, border='lightblue', 
+     main='Extent of Wildlife Habitat Relationship (WHR) Layers \n and Stream Locations, Red = ouside WHR extent')
+plot(streamTAmissing, col='navy', add=TRUE)
+plot(missing, col='red3', add=TRUE)
 
 
 #extracting values to see now many NAs we have
-
-habitat <- overChr(streamTA, whrTA, 'WHRTYPE')
 
 countNA(habitat)
 
