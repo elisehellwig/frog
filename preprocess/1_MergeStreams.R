@@ -2,15 +2,16 @@
 ## this script imports the CA and NV data and merges it.
 
 ###############Setup##############
+#loading required packages 
 library(raster)
 library(rgdal)
 library(tidyverse)
 
-#setting paths
+#saving paths I use to variables for later use
 funpath <- '/Users/echellwig/Research/frog/functions/'
 datapath <- '/Users/echellwig/Research/frogData/data/'
 
-#importing functions
+#importing functions for preprocessing of data
 source(file.path(funpath, 'preprocess.R'))
 
 #importing spatial streams data
@@ -26,19 +27,13 @@ ca$state <- 'CA'
 nv$state <- 'NV'
 
 
-#converting all names to lower case
+#converting all names to lower case to help with column name matching
 names(ca) <- tolower(names(ca))
 names(nv) <- tolower(names(nv))
 
-#removing underscores for consistency when merging
+#removing underscores for column name consistency when merging
 names(ca) <- gsub("ppt_q","pptq", names(ca))
 names(nv) <- gsub("fdate_1", 'fdate', names(nv))
-
-#renaming this col so they are the same in both datasets
-fdatID <- which(names(nv)=='fdate_1')
-names(nv)[fdatID] <- 'fdate'
-
-
 
 #getting all the columns both sets of data have
 varnames <- intersect(names(ca), names(nv))
@@ -69,5 +64,6 @@ saveRDS(streamsfinal, file.path(datapath, 'processed/RasiStreamLines.RDS'))
 
 #Saving spatiallinesdataframe as as shapefile
 shapefile(streamsfinal, 
-          file.path(datapath, 'processed/shapefiles/RasiStreamLines'))
+          file.path(datapath, 'processed/shapefiles/RasiStreamLines.shp'),
+          overwrite=TRUE)
 
