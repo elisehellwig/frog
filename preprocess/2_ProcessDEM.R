@@ -55,23 +55,10 @@ streamDEM <- raster(file.path(datapath, 'processed/localDEM.grd'))
 #calcualting aspect
 streamDEM$aspect <- terrain(streamDEM$layer, 'aspect', unit = 'degrees')  
 
-
-#Setting up the key for recoding aspect to a character
-cardseq <-c(0, rep(seq(22.5, 337.5, by=45), each=2), 360)
-mcard1 <- matrix(cardseq, ncol=2, byrow=TRUE)
-dfcard <- data.frame(mcard1)
-dfcard$id <- 1:9
-dfcard$string <- c('N','NE','E','SE','S','SW','W','NW','N')
-names(dfcard)[1:2] <- c('min','max')
-
-aspect <- getValues(streamDEM$aspect)
-aspectid <- recodeRange(aspect, dfcard, string=TRUE, digits=0) 
-
-#Convert to cardinal directions N1=(0-45, 315-360), E2=(45-135), S3=(135-225), 
-    #W4=(225-315)
-
+#calculating slope
 streamDEM$slope <- terrain(streamDEM$layer, 'slope')
 
+#saving everything to a file
 writeRaster(streamDEM, file.path(datapath,'processed/streamGeography.grd'),
             overwrite=TRUE)
 
