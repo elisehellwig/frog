@@ -50,5 +50,37 @@ overChr <- function(x, y, variable) {
     return(most)
 }
 
-
+recodeRange <- function(v, df, string=TRUE) {
+    require(dplyr)
+    
+    dfn <- names(df)
+    reqnames <- c('min','max','id')
+    if (string) {
+        reqnames <- c(reqnames, 'string')
+    }
+    
+    if (!all(reqnames %in% dfn)) {
+        stop('Your df must have the columns: min, max, id (and string if string=TRUE).')
+    }
+    
+    min <- df$min
+    max <- df$max
+    
+    for (i in 1:ncol(df)) {
+        v[v<max[i] & v>min[i]] <- df$id[i]
+    }
+    
+    if (string) {
+        v <- as.character(v)
+        df$chrID <- as.character(df$id)
+        
+        for (i in 1:ncol(df)) {
+            v[v==df$chrID[i]] <- df$string[i]
+        }
+    }
+    
+    return(v)
+    
+    
+}
 
