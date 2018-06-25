@@ -50,7 +50,7 @@ overChr <- function(x, y, variable) {
     return(most)
 }
 
-recodeRange <- function(v, df, string=TRUE) {
+recodeRange <- function(v, df, string=TRUE, digits=NA) {
     require(dplyr)
     
     dfn <- names(df)
@@ -66,20 +66,28 @@ recodeRange <- function(v, df, string=TRUE) {
     min <- df$min
     max <- df$max
     
-    for (i in 1:ncol(df)) {
-        v[v<max[i] & v>min[i]] <- df$id[i]
+    #print(class(v))
+    if (!is.na(digits)) {
+        vr <- round(v, digits)
+        
+    } else {
+        vr <- v
+    }
+    
+    for (i in 1:nrow(df)) {
+        vr[v<=max[i] & v>=min[i]] <- df$id[i]
     }
     
     if (string) {
-        v <- as.character(v)
+        vr <- as.character(vr)
         df$chrID <- as.character(df$id)
         
-        for (i in 1:ncol(df)) {
-            v[v==df$chrID[i]] <- df$string[i]
+        for (i in 1:nrow(df)) {
+            vr[vr==df$chrID[i]] <- df$string[i]
         }
     }
     
-    return(v)
+    return(vr)
     
     
 }
