@@ -21,12 +21,16 @@ ras <- readRDS(file.path(datapath, 'processed/RasiStreamLines.RDS'))
 
 #########################################################
 
+#converting the soil polygons to latlon
 soill <- spTransform(soil, crs(ras))
 
+#extracting out the SoilOrderD variable to see how many NAs we have
 ras$soiltype <- overChr(ras, soill, 'SoilOrderD')
 
 
-#for plotting
+#Aggregate soil area to make it easier to plot
 soilagg <- aggregate(soill)
+
+#see where the rasi data is outside of the soil coverage
 geodif <- gDifference(ras, soilagg, byid=TRUE)
 
