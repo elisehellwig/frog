@@ -45,6 +45,9 @@ whr <- do.call(bind, whrlistTA)
 saveRDS(whr, file.path(datapath, 'processed/whr.RDS'))
 shapefile(whr, file.path(datapath, 'processed/shapefiles/whr.shp'))
 
+##################################################################
+
+
 whrbuff <- gBuffer(whr, byid=TRUE, width=0)
 
 habitattype <- overChr(streamTA, whr, 'WHRTYPE')
