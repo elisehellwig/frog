@@ -7,6 +7,7 @@ library(rgeos)
 library(foreign)
 library(ehelpr)
 
+options(stringsAsFactors = FALSE)
 #setting paths
 funpath <- '/Users/echellwig/Research/frog/functions/'
 datapath <- '/Users/echellwig/Research/frogData/data/'
@@ -19,6 +20,7 @@ soil <- shapefile(file.path(datapath,
 
 ras <- readRDS(file.path(datapath, 'processed/RasiStreamLines.RDS'))
 
+
 #########################################################
 
 #converting the soil polygons to latlon
@@ -27,10 +29,33 @@ soill <- spTransform(soil, crs(ras))
 #extracting out the SoilOrderD variable to see how many NAs we have
 ras$soiltype <- overChr(ras, soill, 'SoilOrderD')
 
+#extracting out other variables that will help us fill in the NAs
+ras$symbol <- overChr(ras, soill, 'EsriSymbol')
+ras$soilname <- overChr(ras, soill, 'muname')
 
-#Aggregate soil area to make it easier to plot
-soilagg <- aggregate(soill)
+#Names and symbols for missing soil types 
+missingSoils <- as.data.frame(rasNAs[,c('symbol','soilname')])
+write.csv(missingSoils, file.path(datapath, 'processed/missingSoils.csv'),
+          row.names=FALSE)
 
-#see where the rasi data is outside of the soil coverage
-geodif <- gDifference(ras, soilagg, byid=TRUE)
+###########################################################
+
+#finding which rows have NAs
+soilNAs <- which(is.na(ras$soiltype))
+
+#saving the mu names and the esri symbols for help in identifying soil type
+rasNAs <- ras[soilNAs, ]
+
+#save missing soils data
+write.csv(rasNAs, file.path(datapath, 'processed/missingSoils.csv'),
+          row.names=FALSE)
+
+#read in the df that tells us what to replace all the NAs in the soils data with
+soilkey <- read.csv(file.path(datapath, 'processed/missingSoilsKey.csv'))
+
+#doing the replacement
+ras$soiltype[soilNAs] <- soilkey$soilkey
+
+saveRDS(ras, file.path(datapath, 'processed/RasiStreamLines.RDS'))
+
 
