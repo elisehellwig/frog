@@ -29,3 +29,25 @@ whrll <- spTransform(whr, ll)
 rasi$whrtype <- overChr(rasi, whrll, 'WHRTYPE')
 
 
+
+######################################################################
+#####################Slope and aspect#################################
+
+
+#Setting up the key for recoding aspect to a character
+cardseq <-c(0, rep(seq(22.5, 337.5, by=45), each=2), 360)
+mcard1 <- matrix(cardseq, ncol=2, byrow=TRUE)
+dfcard <- data.frame(mcard1)
+dfcard$id <- 1:9
+dfcard$string <- c('N','NE','E','SE','S','SW','W','NW','N')
+names(dfcard)[1:2] <- c('min','max')
+
+streamDEM$cardinal <- recodeRange(streamDEM$aspect, dfcard, string=TRUE,
+                                  digits=0) 
+
+
+
+
+
+
+
