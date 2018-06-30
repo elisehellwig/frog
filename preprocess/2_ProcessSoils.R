@@ -5,7 +5,7 @@ library(raster)
 library(rgdal)
 library(rgeos)
 library(foreign)
-library(ehelpr)
+#library(ehelpr)
 
 options(stringsAsFactors = FALSE)
 #setting paths
@@ -18,7 +18,7 @@ source(file.path(funpath, 'preprocess.R'))
 soil <- shapefile(file.path(datapath, 
                 'frog_model/data/output/MergedSoilsClipFinal.shp'))
 
-ras <- readRDS(file.path(datapath, 'processed/RasiStreamLines.RDS'))
+ras <- readRDS(file.path(datapath, 'processed/RasiStreamLines1.RDS'))
 
 
 #########################################################
@@ -56,6 +56,6 @@ soilkey <- read.csv(file.path(datapath, 'processed/missingSoilsKey.csv'))
 #doing the replacement
 ras$soiltype[soilNAs] <- soilkey$class
 
-saveRDS(ras, file.path(datapath, 'processed/RasiStreamLines.RDS'))
+saveRDS(ras, file.path(datapath, 'processed/RasiStreamLines2.RDS'))
 
 
