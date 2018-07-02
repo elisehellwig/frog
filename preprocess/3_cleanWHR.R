@@ -19,15 +19,6 @@ ras <- readRDS(file.path(datapath, 'processed/RasiStreamLines2.RDS'))
 
 TA <- CRS('+proj=aea +lat_1=34 +lat_2=40.5 +lat_0=0 +lon_0=-120 +x_0=0 +y_0=-4000000 +ellps=GRS80 +datum=NAD83 +units=m +no_defs ')
 
-whrname <- c('Alpine-Dwarf Shrub','Annual Grassland','Aspen','Barren',
-             'Douglas-Fir', 'Eastside Pine','Jeffrey Pine',
-             'Lacustrine','Lodgepole Pine','Mixed Chaparral',
-             'Montane Chaparral', 'Montane Hardwood-Conifer',
-             'Montane Hardwood', 'Montane Riparian', 'Pasture',
-             'Perennial Grassland','Ponderosa Pine','Red Fir', 'Riverine',
-             'Subalpine Conifer', 'Sagebrush','Sierran Mixed Conifer',
-             'Urban', 'White Fir', 'Wet Meadow')
-
 
 # Merging WHR Layers ------------------------------------------------------
 

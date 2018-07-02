@@ -8,6 +8,16 @@ library(ggplot2)
 funpath <- '/Users/echellwig/Research/frog/functions/'
 datapath <- '/Users/echellwig/Research/frogData/data/'
 
+whrname <- c('Alpine-Dwarf Shrub','Annual Grassland','Aspen','Barren',
+             'Douglas-Fir', 'Eastside Pine','Jeffrey Pine',
+             'Lacustrine','Lodgepole Pine','Mixed Chaparral',
+             'Montane Chaparral', 'Montane Hardwood-Conifer',
+             'Montane Hardwood', 'Montane Riparian', 'Pasture',
+             'Perennial Grassland','Ponderosa Pine','Red Fir', 'Riverine',
+             'Subalpine Conifer', 'Sagebrush','Sierran Mixed Conifer',
+             'Urban', 'White Fir', 'Wet Meadow')
+
+
 
 
 # WHR Type Plots ----------------------------------------------------------
