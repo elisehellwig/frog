@@ -114,8 +114,28 @@ lifehist <- ggplot(data=lifedf) +
     geom_bar(aes(x=name, y=count), stat='identity') +
     labs(x='WHR Life Form', y='Stream Reach Count',
          title='Number of stream reaches by lifeform, n=2232') +
-    theme_bw(12) + 
-    theme(axis.text.x = element_text(angle = 65, hjust = 1)) 
+    theme_bw(16) + 
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+
+
+
+# Cover Type Plot ---------------------------------------------------------
+
+
+
+covername <- c('Barren', 'Conifer','Hardwood','Herbaceous','Mixed','Shrub',
+               'Urban','Water')
+coverdf <- data.frame(name=covername,
+                     whr=table(ras$covertype))
+names(coverdf) <- c('name','code','count')
+
+coverhist <- ggplot(data=coverdf) + 
+    geom_bar(aes(x=name, y=count), stat='identity') +
+    labs(x='WHR Cover Type', y='Stream Reach Count',
+         title='Number of stream reaches by cover type, n=2622') +
+    theme_bw(16) + 
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+
 
 
 
