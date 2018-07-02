@@ -51,7 +51,11 @@ overChr <- function(x, y, variable) {
 }
 
 recodeRange <- function(v, df, string=TRUE, digits=NA) {
-    require(dplyr)
+    require(raster)
+    
+    if (is.raster(v)) {
+        v <- getValues(v)
+    }
     
     dfn <- names(df)
     reqnames <- c('min','max','id')
@@ -90,5 +94,16 @@ recodeRange <- function(v, df, string=TRUE, digits=NA) {
     return(vr)
     
     
+}
+
+
+recodeBlank <- function(x) {
+    
+    xsquished <- gsub(" ", "", x)
+    
+    blankIDs <- which(xsquished=='')
+    x[blankIDs] <- NA
+
+    return(x)
 }
 
