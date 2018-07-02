@@ -3,6 +3,9 @@
 #calculates some variables of interest (ex. slope, aspect etc.)
 
 
+# Setup -------------------------------------------------------------------
+
+
 #loading required packages
 library(tidyverse)
 library(raster)
@@ -17,9 +20,12 @@ funpath <- '/Users/echellwig/Research/frog/functions/'
 #importing functions for preprocessing of data
 source(file.path(funpath, 'preprocess.R'))
 
-##########################################################
-###########Creating DEM###################################
+#change to RasiStreamLines3 when that gets created
+ras <- readRDS(file.path(datapath, 'processed/RasiStreamLines2.RDS'))
 
+
+
+# Create DEM --------------------------------------------------------------
 
 #creating file names of the DEMS
 grids <- paste0('n', rep(c(40,41), each=3), 'w', rep(120:122, 2))
@@ -49,7 +55,11 @@ streamDEM <- crop(dem, streamExt)
 #saving the DEM as a GRD
 writeRaster(streamDEM, file.path(datapath, 'processed/localDEM.grd'))
 
-########################Processing DEM##########################
+
+# Process DEM -------------------------------------------------------------
+
+
+
 streamDEM <- raster(file.path(datapath, 'processed/localDEM.grd'))
 
 #calcualting aspect
@@ -61,5 +71,9 @@ streamDEM$slope <- terrain(streamDEM$layer, 'slope')
 #saving everything to a file
 writeRaster(streamDEM, file.path(datapath,'processed/streamGeography.grd'),
             overwrite=TRUE)
+
+
+
+# Extract Values ----------------------------------------------------------
 
 
