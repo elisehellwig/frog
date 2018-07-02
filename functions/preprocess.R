@@ -51,11 +51,6 @@ overChr <- function(x, y, variable) {
 }
 
 recodeRange <- function(v, df, string=TRUE, digits=NA) {
-    require(raster)
-    
-    if (is.raster(v)) {
-        v <- getValues(v)
-    }
     
     dfn <- names(df)
     reqnames <- c('min','max','id')
@@ -106,4 +101,7 @@ recodeBlank <- function(x) {
 
     return(x)
 }
+
+
+
 
