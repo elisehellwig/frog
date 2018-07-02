@@ -102,17 +102,28 @@ ras$whrsize <- recodeBlank(ras$whrsize)
 ras$lifeform <- overChr(ras, whr,'WHRLIFEFORM') # 870 NAs 
 ras$lifeform <- recodeBlank(ras$lifeform)
 
+ras$covertype[which(ras$covertype=='NFO')] <- 'No Forest'
 
 
 # Cover Type --------------------------------------------------------------
 
-ras$covertype <- overChr(ras, whr,'COVERTYPE') #478 NAs 
+ras$covertype <- overChr(ras, whr,'COVERTYPE') #480 NAs 
 ras$covertype <- recodeBlank(ras$covertype)
 
+ras$covertype[which(ras$covertype=='XXX')] <- NA
 
+
+
+# Collapse WHR Type -------------------------------------------------------
+
+typedf <- data.frame(ras[, c('whrtype','lifeform','covertype')])
+
+typedf <- typedf[complete.cases(typedf),]
+typedf$lifeform <- gsub('WHR_', '', typedf$lifeform)
 
 # Save File ---------------------------------------------------------------
 
 saveRDS(ras, file.path(datapath, 'processed/RasiStreamLines3.RDS'))
-
+shapefile(ras, file.path(datapath, 
+                         'processed/shapefiles/RasiStreamLines3.shp'))
 
