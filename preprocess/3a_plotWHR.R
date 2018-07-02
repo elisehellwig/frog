@@ -105,7 +105,7 @@ sizehist <- ggplot(data=sizedf) +
 # Life Form Plot ----------------------------------------------------------
 #note I don't know what NFO stands for
 
-lifename <- c('Conifer','Hardwood','Herbaceous','Mixed','NFO','Shrub')
+lifename <- c('Conifer','Hardwood','Herbaceous','Mixed','NFO?','Shrub')
 lifedf <- data.frame(name=lifename,
                      whr=table(ras$lifeform))
 names(lifedf) <- c('name','code','count')
@@ -113,7 +113,7 @@ names(lifedf) <- c('name','code','count')
 lifehist <- ggplot(data=lifedf) + 
     geom_bar(aes(x=name, y=count), stat='identity') +
     labs(x='WHR Life Form', y='Stream Reach Count',
-         title='Number of stream reaches by Life Form, n=2232') +
+         title='Number of stream reaches by lifeform, n=2232') +
     theme_bw(12) + 
     theme(axis.text.x = element_text(angle = 65, hjust = 1)) 
 
