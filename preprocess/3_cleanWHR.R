@@ -71,8 +71,8 @@ ras$whrtype[brrIds] <- "BAR"
 
 # WHR Density -------------------------------------------------------------
 
-ras$whrdensity <- overChr(ras, whr, 'WHRDENSITY') #70 NAs 
-recodeBlank(ras$whrdensity)
+ras$whrdensity <- overChr(ras, whr, 'WHRDENSITY') #397 NAs 
+ras$whrdensity <- recodeBlank(ras$whrdensity)
 
 
 # #after recoding blanks as NAs there were 13 rows with rasi presence that had
@@ -102,7 +102,7 @@ ras$whrsize <- recodeBlank(ras$whrsize)
 ras$lifeform <- overChr(ras, whr,'WHRLIFEFORM') # 870 NAs 
 ras$lifeform <- recodeBlank(ras$lifeform)
 
-ras$covertype[which(ras$covertype=='NFO')] <- 'No Forest'
+ras$lifeform[which(ras$lifeform=='NFO')] <- 'No Forest'
 
 
 # Cover Type --------------------------------------------------------------
@@ -125,5 +125,6 @@ typedf$lifeform <- gsub('WHR_', '', typedf$lifeform)
 
 saveRDS(ras, file.path(datapath, 'processed/RasiStreamLines3.RDS'))
 shapefile(ras, file.path(datapath, 
-                         'processed/shapefiles/RasiStreamLines3.shp'))
+                         'processed/shapefiles/RasiStreamLines3.shp'),
+          overwrite=TRUE)
 
