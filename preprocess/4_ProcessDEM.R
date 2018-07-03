@@ -85,12 +85,12 @@ demdf <- extract(dem, ras, df=TRUE)
 demdf$fid <- as.factor(demdf$ID)
 
 #Calculating slope summary statistics for each reach
-ras$slopemax <- tapply(demdf$slope, demdf$fid, FUN = max)
-ras$slopemin <- tapply(demdf$slope, demdf$fid, FUN = min)
-ras$slopemean <- tapply(demdf$slope, demdf$fid, FUN = mean)
+ras$slopemax <- collapseVariable(demdf$slope, demdf$fid, fun = max)
+ras$slopemin <- collapseVariable(demdf$slope, demdf$fid, fun = min)
+ras$slopemean <- collapseVariable(demdf$slope, demdf$fid, fun = mean)
 
 #elevation 
-ras$elevmax <- tapply(demdf$elevation, demdf$fid, FUN = max)
+ras$elevmax <- collapseVariable(demdf$layer, demdf$fid, fun = max)
 
 
 # Process Aspect ----------------------------------------------------------
@@ -116,4 +116,10 @@ ras$cardinal <- sapply(1:length(ras), function(i) {
     getMode(vcard)
     
 })
+
+
+saveRDS(ras, file.path(datapath, 'processed/RasiStreamLinesFinal.RDS'))
+shapefile(ras, file.path(datapath, 
+                         'processed/shapefiles/RasiStreamLinesFinal.shp'),
+          overwrite=TRUE)
 
