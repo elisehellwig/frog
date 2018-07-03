@@ -80,8 +80,10 @@ writeRaster(streamDEM, file.path(datapath,'processed/streamGeography.grd'),
 dem <- brick(file.path(datapath,'processed/streamGeography.grd'))
 
 #note this takes about 2.5 hours to run
-demdf <- extract(dem, ras, df=TRUE)
+#demdf <- extract(dem, ras, df=TRUE)
+#saveRDS(demdf, file.path(datapath, 'processed/extractedDEMvalues.RDS'))
 
+demdf <- readRDS( file.path(datapath, 'processed/extractedDEMvalues.RDS'))
 demdf$fid <- as.factor(demdf$ID)
 
 #Calculating slope summary statistics for each reach
