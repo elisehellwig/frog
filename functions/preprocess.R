@@ -103,5 +103,17 @@ recodeBlank <- function(x) {
 }
 
 
-
+collapseVariable <- function(v, f, fun=mean, na.rm=NA) {
+    
+    if (!is.factor(f)) {
+        f <- as.factor(f)
+    }
+    
+    oneD <- tapply(v, f, FUN = fun)
+    
+    vec <- as.vector(unlist(oneD))
+    
+    return(vec)
+    
+}
 
