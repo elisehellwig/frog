@@ -1,4 +1,11 @@
 ###############Process Soils#####################
+## This script cleans up the soil data and extracts the most common soil type
+## for each stream reach
+
+
+# Setup -------------------------------------------------------------------
+
+
 
 library(tidyverse)
 library(raster)
@@ -21,7 +28,9 @@ soil <- shapefile(file.path(datapath,
 ras <- readRDS(file.path(datapath, 'processed/RasiStreamLines1.RDS'))
 
 
-#########################################################
+
+# Extracting values from SSURGO ----------------------------------------------
+
 
 #converting the soil polygons to latlon
 soill <- spTransform(soil, crs(ras))
@@ -32,6 +41,11 @@ ras$soiltype <- overChr(ras, soill, 'SoilOrderD')
 #extracting out other variables that will help us fill in the NAs
 ras$symbol <- overChr(ras, soill, 'EsriSymbol')
 ras$soilname <- overChr(ras, soill, 'muname')
+
+
+
+# Replacing missing values --------------------------------------------------
+
 
 
 #finding which rows have NAs
@@ -45,9 +59,6 @@ rasNAs <- ras[soilNAs, ]
 #missingSoils <- as.data.frame(rasNAs[,c('symbol','soilname')])
 #write.csv(missingSoils, file.path(datapath, 'processed/missingSoils.csv'),
         #  row.names=FALSE)
-
-###########################################################
-
 
 
 #read in the df that tells us what to replace all the NAs in the soils data with
