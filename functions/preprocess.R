@@ -50,6 +50,20 @@ overChr <- function(x, y, variable) {
     return(most)
 }
 
+
+recodeDF <- function(v, df, fromname='from',toname='to') {
+    #note 
+    
+    vr <- v
+    
+    for (i in 1:nrow(df)) {
+        vr[v==df[i, fromname]] <- df[i, toname]
+    }
+    
+    return(vr)
+    
+}
+
 recodeRange <- function(v, df, string=TRUE, digits=NA) {
     
     dfn <- names(df)
