@@ -144,26 +144,40 @@ recodeRange <- function(v, df, string=TRUE, digits=NA) {
     
 }
 
-
+#This function converts blank elements (ex. ' ') to NAs
 recodeBlank <- function(x) {
+    #a vector with blank elements to be recoded
     
-    xsquished <- gsub(" ", "", x)
+    xsquished <- gsub(" ", "", x) #convert all elements with only spaces
     
-    blankIDs <- which(xsquished=='')
-    x[blankIDs] <- NA
+    blankIDs <- which(xsquished=='') #which elements have nothing in them
+    x[blankIDs] <- NA #convert those elements to NA
 
-    return(x)
+    return(x) #return converted vector
 }
 
 
-collapseVariable <- function(v, f, fun=mean, na.rm=NA) {
+#this function takes in a numeric vector and a factor and collapses the vector
+#by the factor groupings. Basically a wrapper around tapply but it returns a 
+#vector instead of a 1d array
+collapseVariable <- function(v, f, fun=mean, rmNA=FALSE) {
+    #v the vector to be collapsed
+    #f the vector specifying the groupings of v, should be same length as v
+    #fun the function used to do the collapsing, a summary stat
+    #rmNA should na.rm=TRUE be passed to the tapply call
     
+    #if f isn't a factor, convert it to one
     if (!is.factor(f)) {
         f <- as.factor(f)
     }
     
-    oneD <- tapply(v, f, FUN = fun)
-    
+    if (NArm) { #if nas need to be removed
+        oneD <- tapply(v, f, FUN = fun, na.rm=TRUE)
+    } else {
+        oneD <- tapply(v, f, FUN = fun)
+    }
+   
+    #convert 1d array to a vector
     vec <- as.vector(unlist(oneD))
     
     return(vec)
