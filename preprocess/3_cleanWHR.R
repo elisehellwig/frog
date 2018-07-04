@@ -15,7 +15,7 @@ datapath <- '/Users/echellwig/Research/frogData/data/'
 source(file.path(funpath, 'preprocess.R'))
 ras <- readRDS(file.path(datapath, 'processed/RasiStreamLines2.RDS'))
 typeAgg <- read.csv(file.path(datapath,
-                              'Processed/TypeAggregationScheme.csv'))
+                              'processed/TypeAggregationScheme.csv'))
 
 TA <- CRS('+proj=aea +lat_1=34 +lat_2=40.5 +lat_0=0 +lon_0=-120 +x_0=0 +y_0=-4000000 +ellps=GRS80 +datum=NAD83 +units=m +no_defs ')
 
