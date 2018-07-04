@@ -54,7 +54,7 @@ streams <- rbind(nvMerge, caMerge)
 # Cleaning Streams Data ---------------------------------------------------
 
 #removing the old rasi pa data
-#streams$rasi_prese <- NULL
+names(streams) <- gsub('_prese', '', names(streams))
 
 streams$fcode <- recode(streams$fcode, `46006`='perennial', 
                         `46003`='intermittent', `46000`='other')
@@ -63,28 +63,14 @@ streams$fcode <- recode(streams$fcode, `46006`='perennial',
 #calculating stream reach length, in km
 streams$length <- SpatialLinesLengths(streams, longlat = TRUE)
 
-
-# Non-Spatial Merge -------------------------------------------------------
-
-#converting names to lower for consistency
-names(rasiCA) <- tolower(names(rasiCA))
-names(rasiNV) <- tolower(names(rasiNV))
-
-#rbinding comid and rasi presence 
-rasi <- rbind(rasiCA[,-3], rasiNV[,-3])
-names(rasi)[2] <- 'rasi' 
-
-#merging the updated rasi p/a data with the streams data
-streamsRasi <- merge(streams, rasi, by='comid')
-
-
+streams$rasichk <- NULL
 
 # Saving output ---------------------------------------------------------
 
 
 #removing the column 'comid_12'
-c12_ID <- which(names(streamsRasi)=='comid_12')
-streamsfinal <- streamsRasi[,-c12_ID]
+c12_ID <- which(names(streams)=='comid_12')
+streamsfinal <- streams[,-c12_ID]
 
 
 #saving the spatiallinesdataframe to to a smaller file type
