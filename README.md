@@ -69,4 +69,13 @@ __4_ProcessDEM.R__ *NOTE: This script only needs to be run once, not everytime d
  	* processed/streamGeography.grd
  	* processed/extractedDEMvalues.RDS
 
+__5_finalCleaning.R__ This script takes the extracted DEM/geography data, collapses it and adds it to the rasi spatiallinesdataframe. Then it removes rows with NAs, and columns we don't need and renames all columns to have sensible short names.
+
+ * Input files:
+
+ 	* processed/extractedDEMvalues.RDS
+ 	* processed/RasiStreamLines3.RDS
+
+ * Output files: processed/RasiStreamLinesFinal.RDS
+
 
