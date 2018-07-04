@@ -24,14 +24,6 @@ ca <- shapefile(file.path(datapath,
 nv <- shapefile(file.path(datapath, 
             'raw/rasi/NHDflowlineGB_Streams_Final_withRASI.shp'))
 
-#importing updated absence/presence data for rasi
-rasiNV <- read.table(file.path(datapath,
-                    'raw/rasi/NHDflowlineGB_Streams_Final_RASIPres070118.tab'),
-                    sep="\t", header=TRUE)
-rasiCA <- read.table(file.path(datapath,
-                    'raw/rasi/NHDflowline_Streams_Final_RASIPres_070118.tab'),
-                     sep="\t", header=TRUE)
-
 
 # Spatial Merge ------------------------------------------------------
 
@@ -62,7 +54,7 @@ streams <- rbind(nvMerge, caMerge)
 # Cleaning Streams Data ---------------------------------------------------
 
 #removing the old rasi pa data
-streams$rasi_prese <- NULL
+#streams$rasi_prese <- NULL
 
 streams$fcode <- recode(streams$fcode, `46006`='perennial', 
                         `46003`='intermittent', `46000`='other')
