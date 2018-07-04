@@ -7,7 +7,6 @@
 
 
 #loading required packages
-library(tidyverse)
 library(raster)
 library(rgdal)
 library(rgeos)

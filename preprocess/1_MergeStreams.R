@@ -8,7 +8,6 @@
 #loading required packages 
 library(raster)
 library(rgdal)
-library(tidyverse)
 options(stringsAsFactors = FALSE)
 
 #saving paths I use to variables for later use

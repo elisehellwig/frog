@@ -1,7 +1,6 @@
 library(raster)
 library(rgdal)
 library(rgeos)
-library(tidyverse)
 library(ggplot2)
 
 #setting paths

@@ -5,8 +5,6 @@
 library(raster)
 library(rgdal)
 library(rgeos)
-library(tidyverse)
-library(ggplot2)
 options(stringsAsFactors = FALSE)
 
 #setting paths

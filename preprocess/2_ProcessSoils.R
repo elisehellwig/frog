@@ -7,11 +7,9 @@
 
 
 
-library(tidyverse)
 library(raster)
 library(rgdal)
 library(rgeos)
-library(foreign)
 #library(ehelpr)
 
 options(stringsAsFactors = FALSE)
