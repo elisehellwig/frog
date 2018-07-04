@@ -4,15 +4,7 @@ This repository is the code repository for a maximum entropy species distributio
 
 All data is stored in frogData/data. Documentation for the data can be found in frogData/documentation.
 
-## System Requirements
-
-__R Packages__
-
- * sp
- * raster
- * rgdal
- * rgeos
- * ggplot2 
+__Required R Packages:__ sp, raster, rgdal, rgeos, ggplot2 
 
 ## Files
 
