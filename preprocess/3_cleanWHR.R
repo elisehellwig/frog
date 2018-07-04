@@ -7,6 +7,7 @@ library(rgdal)
 library(rgeos)
 library(tidyverse)
 library(ggplot2)
+options(stringsAsFactors = FALSE)
 
 #setting paths
 funpath <- '/Users/echellwig/Research/frog/functions/'
@@ -15,7 +16,8 @@ datapath <- '/Users/echellwig/Research/frogData/data/'
 #importing functions
 source(file.path(funpath, 'preprocess.R'))
 ras <- readRDS(file.path(datapath, 'processed/RasiStreamLines2.RDS'))
-
+typeAgg <- read.csv(file.path(datapath,
+                              'Processed/TypeAggregationScheme.csv'))
 
 TA <- CRS('+proj=aea +lat_1=34 +lat_2=40.5 +lat_0=0 +lon_0=-120 +x_0=0 +y_0=-4000000 +ellps=GRS80 +datum=NAD83 +units=m +no_defs ')
 
@@ -64,10 +66,10 @@ whr <- spTransform(whr, crs(ras))
 ## All 70 observations with NAs for whrtype have no rasi presence
 ## Merging with lifeform and covertype does not eliminate these nas
 
-ras$whrtype <- overChr(ras, whr, 'WHRTYPE') 
-brrIds <- which(ras$whrtype=='BBR')
-ras$whrtype[brrIds] <- "BAR"
 
+
+ras$whrtype <- overChr(ras, whr, 'WHRTYPE') 
+ras$whrtype <- recodeDF(ras$whrtype, typeAgg)
 
 # WHR Density -------------------------------------------------------------
 
@@ -99,7 +101,7 @@ ras$whrsize <- recodeBlank(ras$whrsize)
 
 # Life Form ---------------------------------------------------------------
 
-ras$lifeform <- overChr(ras, whr,'WHRLIFEFORM') # 870 NAs 
+ras$lifeform <- overChr(ras, whr,'WHRLIFEFORM') # 870 NAs, 28 w/ rasi pres
 ras$lifeform <- recodeBlank(ras$lifeform)
 
 ras$lifeform[which(ras$lifeform=='NFO')] <- 'No Forest'
@@ -107,19 +109,13 @@ ras$lifeform[which(ras$lifeform=='NFO')] <- 'No Forest'
 
 # Cover Type --------------------------------------------------------------
 
-ras$covertype <- overChr(ras, whr,'COVERTYPE') #480 NAs 
+ras$covertype <- overChr(ras, whr,'COVERTYPE') #480 NAs , 17 with rasi pres
 ras$covertype <- recodeBlank(ras$covertype)
 
 ras$covertype[which(ras$covertype=='XXX')] <- NA
 
 
 
-# Collapse WHR Type -------------------------------------------------------
-
-typedf <- data.frame(ras[, c('whrtype','lifeform','covertype')])
-
-typedf <- typedf[complete.cases(typedf),]
-typedf$lifeform <- gsub('WHR_', '', typedf$lifeform)
 
 # Save File ---------------------------------------------------------------
 
