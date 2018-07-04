@@ -51,14 +51,14 @@ __3_CleanWHR.R__ This script imports three data layers from the CWHRVg and uses 
  * Output files: processed/RasiStreamLines3.RDS
 
 
-
-__4_ ProcessDEM.R__ This script imports a 1/3 arc-second DEM from the USGS website (https://viewer.nationalmap.gov/basic/, [-121.8, -120, 39.1, 40.5]), merges it to create one local DEM, and saves it to localDEM.grd. Then the script calculates slope and aspect from the DEM and saves it to streamGeography.grd.
+__4_ProcessDEM.R__ *NOTE: This script only needs to be run once, not everytime data gets updated upstream.* This script imports a 1/3 arc-second DEM from the USGS website (https://viewer.nationalmap.gov/basic/, [-121.8, -120, 39.1, 40.5]), merges it to create one local DEM, and saves it to localDEM.grd. Then the script calculates slope and aspect from the DEM and saves it to streamGeography.grd. Finally the script extracts slope and aspect variables using the rasi spatiallinesdataframe and saves that to extractedDEMvalues.RDS
 
  * Input files: 
 
+ 	* processed/RasiStreamLines3.RDS
  	* DEM/n40w120/floatn40w120_13.flt 
  	* DEM/n40w121/floatn40w121_13.flt 
- 	* DEM/n40w122/floatn40w122_13.flt 
+ 	* DEM/USGS_NED_13_n40w122_GridFloat/usgs_ned_13_n40w122_gridfloat.flt
  	* DEM/n41w120/floatn41w120_13.flt 
  	* DEM/n41w121/floatn41w121_13.flt 
  	* DEM/n41w122/floatn41w122_13.flt
@@ -67,5 +67,6 @@ __4_ ProcessDEM.R__ This script imports a 1/3 arc-second DEM from the USGS websi
 
  	* processed/localDEM.grd
  	* processed/streamGeography.grd
+ 	* processed/extractedDEMvalues.RDS
 
 
