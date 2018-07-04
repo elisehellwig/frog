@@ -1,53 +1,97 @@
 ##################Extract Values#####################
 
-library(tidyverse)
+# Setup -------------------------------------------------------------------
+
+
+#loading required packages
 library(raster)
 library(rgdal)
 library(rgeos)
-library(ehelpr)
 
-funpath <- '/Users/echellwig/Research/frog/functions/'
+
+#saving the path where data is stored as a variable for later use
 datapath <- '/Users/echellwig/Research/frogData/data/'
-
-#importing functions
-source(file.path(funpath, 'preprocess.R'))
-orig <- read.table(file.path(datapath, 'cathy/rasi_mxt_allstr3.tab'),
-                   header=TRUE, stringsAsFactors = FALSE, sep='\t')
+funpath <- '/Users/echellwig/Research/frog/functions/'
 
 
-rasi <- readRDS(file.path(datapath, 'processed/RasiStreamLines.RDS'))
-dem <- brick(file.path(datapath,'processed/streamGeography.grd'))
-whr <- readRDS(file.path(datapath, 'processed/whr.RDS'))
-soil <- shapefile(file.path(datapath, 
-                            'frog_model/data/output/MergedSoilsClipFinal.shp'))
+demdf <- readRDS(file.path(datapath, 'processed/extractedDEMvalues.RDS'))
 
-ll <- crs(rasi)
-
-############################################################################
-whrll <- spTransform(whr, ll)
-
-rasi$whrtype <- overChr(rasi, whrll, 'WHRTYPE')
+ras <- readRDS(file.path(datapath, 'processed/RasiStreamLines3.RDS'))
 
 
+# Collapse DEM Variables ---------------------------------------------------
 
-######################################################################
-#####################Slope and aspect#################################
+demdf$fid <- as.factor(demdf$ID)
 
+#Calculating slope summary statistics for each reach
+ras$slopemax <- collapseVariable(demdf$slope, demdf$fid, fun = max)
+ras$slopemin <- collapseVariable(demdf$slope, demdf$fid, fun = min)
+ras$slopemean <- collapseVariable(demdf$slope, demdf$fid, fun = mean)
 
-#Setting up the key for recoding aspect to a character
-cardseq <-c(0, rep(seq(22.5, 337.5, by=45), each=2), 360)
-mcard1 <- matrix(cardseq, ncol=2, byrow=TRUE)
-dfcard <- data.frame(mcard1)
-dfcard$id <- 1:9
-dfcard$string <- c('N','NE','E','SE','S','SW','W','NW','N')
-names(dfcard)[1:2] <- c('min','max')
-
-streamDEM$cardinal <- recodeRange(streamDEM$aspect, dfcard, string=TRUE,
-                                  digits=0) 
+#elevation 
+ras$elevmax <- collapseVariable(demdf$layer, demdf$fid, fun = max)
+ras$elevmin <- collapseVariable(demdf$layer, demdf$fid, fun = min)
 
 
+# Process Aspect ----------------------------------------------------------
+
+#create aspect key
+
+## aspect values
+vals <- c(0, rep(seq(22.5, 337.5, by=45), 2), 360)
+aspdf <- as.data.frame(matrix(vals, ncol=2))
+
+names(aspdf) <- c('min', 'max')
+
+#IDs 
+aspdf$id <- 1:nrow(aspdf)
+
+#cardinal directions
+aspdf$string <- c('N', 'NE', 'E', "SE",'S','SW','W','NW', 'N')
+
+
+ras$cardinal <- sapply(1:length(ras), function(i) {
+    v <- demdf[demdf$ID==i, 'aspect']
+    vcard <- recodeRange(v, aspdf)
+    getMode(vcard)
+    
+})
+
+# Subset rows/columns ------------------------------------------------------
+
+NAids  <- which(!is.na(ras$whrtype))
+ras <- ras[NAids, ]
+
+rnames1 <- c('comid', 'state', 'rasi', 'length', 'elevmax','elevmin', 
+             'slopemax', 'slopemin', 'slopemean', 'cardinal',  
+             'fcode', 'streamorde', 'ptype', 'soiltype', 'whrtype',
+             'totdasqkm', 'divdasqkm')
+
+
+var <- rep(c('ppt','tmax','tmin','tmean'), each=20)
+quarter <- rep(rep(paste0('q', 1:4), each=5), 4)
+sumstat <- rep(c('min','max','beg','end','lwm'), 16)
+
+rnames2 <- paste0(var, quarter, sumstat)
+
+rnames <- c(rnames1, rnames2)
+
+rasfinal <- ras[, rnames]
+
+names(rasfinal)[c(1, 11:17)] <- c('id', 'seasonality','streamOrder',
+                                  'bedrock','soil','habitat','totDrainArea',
+                                  'divDrainArea')
+
+cc <- complete.cases(data.frame(rasfinal))
+
+rasfinal <- rasfinal[cc, ]
+
+# write files -------------------------------------------------------------
 
 
 
-
+saveRDS(rasfinal, file.path(datapath, 'processed/RasiStreamLinesFinal.RDS'))
+shapefile(rasfinal, file.path(datapath, 
+                              'processed/shapefiles/RasiStreamLinesFinal.shp'),
+          overwrite=TRUE)
 
