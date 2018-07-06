@@ -95,6 +95,7 @@ names(rasfinal)[c(1, 11:17)] <- c('id', 'seasonality','streamOrder',
 cc <- complete.cases(data.frame(rasfinal))
 rasfinal <- rasfinal[cc, ]
 
+rasdf <- data.frame(ras)
 # write files -------------------------------------------------------------
 
 
@@ -103,4 +104,6 @@ saveRDS(rasfinal, file.path(datapath, 'processed/RasiStreamLinesFinal.RDS'))
 shapefile(rasfinal, file.path(datapath, 
                               'processed/shapefiles/RasiStreamLinesFinal.shp'),
           overwrite=TRUE)
+write.csv(rasdf, file.path(datapath, 'processed/RasiStreamDF.csv'),
+          row.names = FALSE)
 
