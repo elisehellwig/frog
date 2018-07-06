@@ -65,6 +65,7 @@ soilkey <- read.csv(file.path(datapath, 'processed/missingSoilsKey.csv'))
 #doing the replacement
 ras$soiltype[soilNAs] <- soilkey$class
 
+#save file
 saveRDS(ras, file.path(datapath, 'processed/RasiStreamLines2.RDS'))
 
 
