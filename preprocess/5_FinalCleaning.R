@@ -13,6 +13,9 @@ library(rgeos)
 datapath <- '/Users/echellwig/Research/frogData/data/'
 funpath <- '/Users/echellwig/Research/frog/functions/'
 
+source(file.path(funpath, 'preprocess.R'))
+
+
 #loading DEM values for each of the stream reaches
 demdf <- readRDS(file.path(datapath, 'processed/extractedDEMvalues.RDS'))
 
@@ -60,6 +63,29 @@ ras$cardinal <- sapply(1:length(ras), function(i) {
     
 })
 
+
+# Add extra Variables -----------------------------------------------------
+
+TA <- CRS('+proj=aea +lat_1=34 +lat_2=40.5 +lat_0=0 +lon_0=-120 +x_0=0 +y_0=-4000000 +ellps=GRS80 +datum=NAD83 +units=m +no_defs ')
+rasproj <- spTransform(ras, TA)
+
+ras$length <- gLength(rasproj, byid = TRUE)/1000
+
+rasicoords <- coordinates(ras)
+
+ras$x<- sapply(seq_along(rasicoords), function(i) {
+    mean(rasicoords[[i]][[1]][,1])
+})
+
+ras$y <- sapply(seq_along(rasicoords), function(i) {
+    mean(rasicoords[[i]][[1]][,2])
+})
+
+ras$perennial <- ifelse(ras$fcode=='46006', 1, 0)
+ras$south <- ifelse(grepl('S', ras$cardinal), 1, 0)
+
+
+
 # Subset rows/columns ------------------------------------------------------
 
 #removing habitat types that are NA
@@ -68,10 +94,10 @@ ras <- ras[NAids, ]
 
 
 #the variables we want that are not precipitation or temperature
-rnames1 <- c('comid', 'state', 'rasi', 'length', 'elevmax','elevmin', 
-             'slopemax', 'slopemin', 'slopemean', 'cardinal',  
+rnames1 <- c('comid', 'state', 'rasi', 'length', 'elevmax', 
+             'elevmin', 'slopemax', 'slopemin', 'slopemean', 'cardinal',  
              'fcode', 'streamorde', 'ptype', 'soiltype', 'whrtype',
-             'totdasqkm', 'divdasqkm')
+             'totdasqkm', 'divdasqkm','south','perennial','x', 'y',)
 
 
 #creating names of precip and temp variables
