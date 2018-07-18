@@ -171,7 +171,7 @@ collapseVariable <- function(v, f, fun=mean, rmNA=FALSE) {
         f <- as.factor(f)
     }
     
-    if (NArm) { #if nas need to be removed
+    if (rmNA) { #if nas need to be removed
         oneD <- tapply(v, f, FUN = fun, na.rm=TRUE)
     } else {
         oneD <- tapply(v, f, FUN = fun)
