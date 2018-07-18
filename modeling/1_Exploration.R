@@ -1,6 +1,5 @@
 library(raster)
 library(rgdal)
-library(maxent)
 library(randomForest)
 
 datapath <- '/Users/echellwig/Research/frogData/data/'
@@ -10,27 +9,33 @@ rasi <- read.csv(file.path(datapath,'processed/RasiStreamDF.csv'))
 
 vars <- names(rasi)
 
+rasi$pa <- factor(rasi$rasi)
+
+
+# Subset Absences ---------------------------------------------------------
+
+pres <- which(rasi$rasi==1)
+abse <- which(rasi$rasi==0)
+
+set.seed(28303020)
+subAbs <- sample(abse, 100)
+
+subsetIDs <- c(pres, subAbs)
+
+rasiSub <- rasi[subsetIDs, ]
 
 # Variable Selection ------------------------------------------------------
 
 
+rasiclim <- rasiSub[,c(18:98)]
 
-rasiclim <- rasi[,c(3,18:97)]
+rasiSubf <- rasiSub
+rasiSubf$rasi <- factor(rasiSub$rasi)
 
-rasirf <- randomForest(rasi ~ ., data=rasiclim)
-regimp <- importance(rasirf)
+set.seed(203943)
+rasirff <- randomForest(rasi ~ ., data=rasiSubf[,3:97])
 
-regvarIDs <- which(importance(rasirf)>1.5) 
-regvars <- row.names(importance(rasirf))[regvarIDs]
-
-round(cor(rasi[,regvars]),2)
-
-rasiclimf <- rasiclim
-rasiclimf$rasi <- factor(rasiclim$rasi)
-
-rasirff <- randomForest(rasi ~ ., data=rasiclimf)
-
-vars1 <- c(vars[3:17],'pptq4min','pptq4end','tminq2lwm')
+vars1 <- c(vars[3:17],'tmaxq1min','pptq4max','tmaxq2min')
 rasi1 <- rasi[, vars1]
 
 rf1 <- randomForest(rasi ~ ., data=rasi1)
