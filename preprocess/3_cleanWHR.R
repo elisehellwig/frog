@@ -22,34 +22,34 @@ TA <- CRS('+proj=aea +lat_1=34 +lat_2=40.5 +lat_0=0 +lon_0=-120 +x_0=0 +y_0=-400
 
 # Merging WHR Layers ------------------------------------------------------
 
-# ##Only need to run this once
-# 
-# streamTA <- spTransform(stream, TA)
-# streamExt <- extent(streamTA)
-# 
-# whrpath <- file.path(datapath, 
-#                      'frog_model/data/datasets/cwhr_4Megan/CWHRVg.gdb')
-# 
-# whrlayers <- ogrListLayers(whrpath)
-# attributes(whrlayers) <- NULL
-# 
-# #ogrListLayers
-# whrlist <- lapply(whrlayers, function(l) {
-#     readOGR(dsn=whrpath, layer=l, stringsAsFactors = FALSE)
-# }) 
-# 
-# whrlistTA <- lapply(whrlist, function(spdf) {
-#     crop(spTransform(spdf, TA), streamExt)
-#     })
-# 
-# # whrpaths <- paste('whr', whrnames, sep='/')
-# # whrlist <- lapply(whrpaths, function(fn) shapefile(file.path(datapath, fn)))
-# 
-# whr <- do.call(bind, whrlistTA)
-# 
-# saveRDS(whr, file.path(datapath, 'processed/whr.RDS'))
-# shapefile(whr, file.path(datapath, 'processed/shapefiles/whr.shp'))
-# 
+##Only need to run this once
+
+streamTA <- spTransform(ras, TA)
+streamExt <- extent(streamTA)
+
+whrpath <- file.path(datapath,
+                     'frog_model/data/datasets/cwhr_4Megan/CWHRVg.gdb')
+
+whrlayers <- ogrListLayers(whrpath)
+attributes(whrlayers) <- NULL
+
+#ogrListLayers
+whrlist <- lapply(whrlayers, function(l) {
+    readOGR(dsn=whrpath, layer=l, stringsAsFactors = FALSE)
+})
+
+whrlistTA <- lapply(whrlist, function(spdf) {
+    crop(spTransform(spdf, TA), streamExt)
+    })
+
+# whrpaths <- paste('whr', whrnames, sep='/')
+# whrlist <- lapply(whrpaths, function(fn) shapefile(file.path(datapath, fn)))
+
+whr <- do.call(bind, whrlistTA)
+
+saveRDS(whr, file.path(datapath, 'processed/whr.RDS'))
+shapefile(whr, file.path(datapath, 'processed/shapefiles/whr.shp'))
+
 
 # WHR Processing ----------------------------------------------------------
 
@@ -67,6 +67,7 @@ whr <- spTransform(whr, crs(ras))
 
 
 ras$whrtype <- overChr(ras, whr, 'WHRTYPE') 
+
 ras$whrtype <- recodeDF(ras$whrtype, typeAgg)
 
 # WHR Density -------------------------------------------------------------
