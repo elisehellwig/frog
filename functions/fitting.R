@@ -36,57 +36,6 @@ predictPres <- function(mod, data, prob=NA) {
 }
 
 
-TrainTestMod <- function(data, colname, testIDs, returnMod=FALSE) {
-
-    responseID <- which(names(data)==colname)
-    #print(1)
-    test <- data[testIDs, ]
-    train <- data[-testIDs, ]
-    #print(2)
-    mod <- maxent(data[,-responseID], data[,colname])
-    #print(3)
-    if (returnMod) {
-        print('bad')
-        return(mod)
-        
-    } else {
-        #print(4)
-        probs <- predictPres(mod, test)
-        return(probs)
-    } 
-    
-}
-
-
-undersampleMod <- function(data, n, reps, seed=NA, test=0.2, colname='rasi',
-                           multicore=6L) {
-    require(dismo)
-    require(parallel)
-    
-    m <- n + length(which(data[,colname]==1))
-    
-    
-    if (!is.na(seed)) {
-        set.seed(seed)
-    }
-    
-    datasub <- lapply(1:reps, function(i) {
-        subabs(data, colname, n)
-    })
-    
-    testIDs <- sample(1:m, size=round(m*test))
-    
-    probs <- sapply(1:length(datasub), function(i) {
-        print(i)
-        TrainTestMod(datasub[[i]], colname, testIDs)
-    })
-    
-    probs2 <- cbind(datasub[[1]][testIDs, colname], probs)
-    
-    
-    return(probs2)
-}
-
 
 
 undersampleMaxent <- function(train, test, n, reps, seed=NA, colname='rasi') {
