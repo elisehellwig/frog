@@ -4,7 +4,9 @@ This repository is the code repository for a maximum entropy species distributio
 
 All data is stored in frogData/data. Documentation for the data can be found in frogData/documentation.
 
-__Required R Packages:__ sp, raster, rgdal, rgeos, ggplot2 
+__Required R Packages:__ dismo, ggplot2, raster, rgdal, rgeos, sp
+
+*Note: In order to run the maxent model in the 'dismo' package, you will also need to load the 'rJava' package.
 
 ## Files
 
@@ -17,7 +19,9 @@ __1_MergeStreams.R__ This script take the California Rasi data and the Nevada Ra
  	* raw/rasi/NHDflowline_Streams_Final_withRASI.shp
  	* raw/rasi/NHDflowlineGB_Streams_Final_withRASI.shp
 
- * Output files: processed/RasiStreamLines.RDS
+ * Output files: 
+ 	* processed/RasiStreamLines1.RDS
+ 	* processed/RasiStreamLines1.shp
 
 
 __2_ProcessSoils.R__ This script import a soil dataset provided by previous people and extracts soil type for each of the stream reaches. In case of a stream going through multiple soil types it takes the most common soil type (mode). There are some streams that do not have values in the provided dataset. Those values are saved in missingSoilsKey.csv and were taken from SoilWeb (https://casoilresource.lawr.ucdavis.edu/gmap/).
@@ -69,5 +73,9 @@ __5_finalCleaning.R__ This script takes the extracted DEM/geography data, collap
  	* processed/RasiStreamLines3.RDS
 
  * Output files: processed/RasiStreamLinesFinal.RDS
+
+### Modeling 
+
+__1_Exploration.R__ This 
 
 
