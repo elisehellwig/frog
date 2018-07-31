@@ -15,16 +15,19 @@ library(rgeos)
 options(stringsAsFactors = FALSE)
 #setting paths
 funpath <- '/Users/echellwig/Research/frog/functions/'
-datapath <- '/Users/echellwig/Research/frogData/data/'
+datapath <- '/Volumes/GoogleDrive/My Drive/OtherPeople/frogData/data'
 
 #importing functions
 source(file.path(funpath, 'preprocess.R'))
 
 soil <- shapefile(file.path(datapath, 
-                'frog_model/data/output/MergedSoilsClipFinal.shp'))
+                'raw/soils/MergedSoilsClipFinal.shp'))
 
 ras <- readRDS(file.path(datapath, 'processed/RasiStreamLines1.RDS'))
 
+
+#read in the df that tells us what to replace all the NAs in the soils data with
+soilkey <- read.csv(file.path(datapath, 'processed/missingSoilsKey.csv'))
 
 
 # Extracting values from SSURGO ----------------------------------------------
@@ -59,11 +62,12 @@ rasNAs <- ras[soilNAs, ]
         #  row.names=FALSE)
 
 
-#read in the df that tells us what to replace all the NAs in the soils data with
-soilkey <- read.csv(file.path(datapath, 'processed/missingSoilsKey.csv'))
 
-#doing the replacement
+#doing the soil replacement
 ras$soiltype[soilNAs] <- soilkey$class
+
+
+
 
 #save file
 saveRDS(ras, file.path(datapath, 'processed/RasiStreamLines2.RDS'))
