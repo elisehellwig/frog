@@ -24,7 +24,7 @@ __1_MergeStreams.R__ This script take the California Rasi data and the Nevada Ra
  	* processed/RasiStreamLines1.shp
 
 
-__2_ProcessSoils.R__ This script import a soil dataset provided by previous people and extracts soil type for each of the stream reaches. In case of a stream going through multiple soil types it takes the most common soil type (mode). There are some streams that do not have values in the provided dataset. Those values are saved in missingSoilsKey.csv and were taken from SoilWeb (https://casoilresource.lawr.ucdavis.edu/gmap/).
+__2_ProcessSoils.R__ This script import a soil dataset provided by previous people and extracts soil type for each of the stream reaches. In case of a stream going through multiple soil types it takes the most common soil type (mode). There are some streams that do not have values in the provided dataset. Those values are saved in missingSoilsKey.csv and were taken from SoilWeb (https://casoilresource.lawr.ucdavis.edu/gmap/). 
 	
  * Input files: 
 
@@ -65,12 +65,14 @@ __4_ProcessDEM.R__ *NOTE: This script only needs to be run once, not everytime d
  	* processed/streamGeography.grd
  	* processed/extractedDEMvalues.RDS
 
-__5_finalCleaning.R__ This script takes the extracted DEM/geography data, collapses it and adds it to the rasi spatiallinesdataframe. Then it removes rows with NAs, and columns we don't need and renames all columns to have sensible short names.
+__5_finalCleaning.R__ This script takes the extracted DEM/geography data, collapses it and adds it to the rasi spatiallinesdataframe. Then it removes rows with NAs, and columns we don't need and renames all columns to have sensible short names. It also adds two columns (rocktype and hardness) that are collapsed versions of the geology variable (ptype).
 
  * Input files:
 
  	* processed/extractedDEMvalues.RDS
  	* processed/RasiStreamLines3.RDS
+ 	* processed/rockclassification.csv
+
 
  * Output files: processed/RasiStreamLinesFinal.RDS
 
