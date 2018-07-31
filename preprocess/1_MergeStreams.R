@@ -12,42 +12,42 @@ options(stringsAsFactors = FALSE)
 
 #saving paths I use to variables for later use
 funpath <- '/Users/echellwig/Research/frog/functions/'
-datapath <- '/Users/echellwig/Research/frogData/data/'
+datapath <- '/Volumes/GoogleDrive/My Drive/OtherPeople/frogData/data'
 
 #importing functions for preprocessing of data
 source(file.path(funpath, 'preprocess.R'))
 
 #importing spatial streams data
-ca <- shapefile(file.path(datapath,
+ns <- shapefile(file.path(datapath,
             'raw/rasi/NHDflowline_Streams_Final_withRASI.shp'))
-nv <- shapefile(file.path(datapath, 
+gb <- shapefile(file.path(datapath, 
             'raw/rasi/NHDflowlineGB_Streams_Final_withRASI.shp'))
 
 
 # Spatial Merge ------------------------------------------------------
 
 
-#adding state variable
-ca$state <- 'CA'
-nv$state <- 'NV'
+#adding dataset variable
+ns$source <- 'NorthernSierras'
+gb$source <- 'GreatBasin'
 
 
 #converting all names to lower case to help with column name matching
-names(ca) <- tolower(names(ca))
-names(nv) <- tolower(names(nv))
+names(ns) <- tolower(names(ns))
+names(gb) <- tolower(names(gb))
 
 #removing underscores for column name consistency when merging
-names(ca) <- gsub("ppt_q","pptq", names(ca))
-names(nv) <- gsub("fdate_1", 'fdate', names(nv))
+names(ns) <- gsub("ppt_q","pptq", names(ns))
+names(gb) <- gsub("fdate_1", 'fdate', names(gb))
 
 #getting all the columns both sets of data have
-varnames <- intersect(names(ca), names(nv))
+varnames <- intersect(names(ns), names(gb))
 
-nvMerge <- nv[, varnames]
-caMerge <- ca[, varnames]
+gbMerge <- gb[, varnames]
+nsMerge <- ns[, varnames]
 
 #merging the datasets with only the columns they share
-streams <- rbind(nvMerge, caMerge)
+streams <- rbind(gbMerge, nsMerge)
 
 
 # Cleaning Streams Data ---------------------------------------------------
