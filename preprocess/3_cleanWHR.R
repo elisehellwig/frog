@@ -9,7 +9,7 @@ options(stringsAsFactors = FALSE)
 
 #setting paths
 funpath <- '/Users/echellwig/Research/frog/functions/'
-datapath <- '/Users/echellwig/Research/frogData/data/'
+datapath <- '/Volumes/GoogleDrive/My Drive/OtherPeople/frogData/data'
 
 #importing functions
 source(file.path(funpath, 'preprocess.R'))
@@ -24,31 +24,36 @@ TA <- CRS('+proj=aea +lat_1=34 +lat_2=40.5 +lat_0=0 +lon_0=-120 +x_0=0 +y_0=-400
 
 ##Only need to run this once
 
-streamTA <- spTransform(ras, TA)
-streamExt <- extent(streamTA)
-
-whrpath <- file.path(datapath,
-                     'frog_model/data/datasets/cwhr_4Megan/CWHRVg.gdb')
-
-whrlayers <- ogrListLayers(whrpath)
-attributes(whrlayers) <- NULL
-
-#ogrListLayers
-whrlist <- lapply(whrlayers, function(l) {
-    readOGR(dsn=whrpath, layer=l, stringsAsFactors = FALSE)
-})
-
-whrlistTA <- lapply(whrlist, function(spdf) {
-    crop(spTransform(spdf, TA), streamExt)
-    })
-
-# whrpaths <- paste('whr', whrnames, sep='/')
-# whrlist <- lapply(whrpaths, function(fn) shapefile(file.path(datapath, fn)))
-
-whr <- do.call(bind, whrlistTA)
-
-saveRDS(whr, file.path(datapath, 'processed/whr.RDS'))
-shapefile(whr, file.path(datapath, 'processed/shapefiles/whr.shp'))
+# streamTA <- spTransform(ras, TA)
+# streamExt <- extent(streamTA)
+# 
+# whrpath <- file.path(datapath, 'raw/WHR/CWHRVg.gdb')
+# whrpath2 <- file.path(datapath, 'raw/WHR/TNFWHR')
+# whrlayers <- ogrListLayers(whrpath)[-3]
+# attributes(whrlayers) <- NULL
+# 
+# #ogrListLayers
+# whrlist <- lapply(whrlayers, function(l) {
+#     readOGR(dsn=whrpath, layer=l, stringsAsFactors = FALSE)
+# })
+# 
+# whrlistTA <- lapply(whrlist, function(spdf) {
+#     crop(spTransform(spdf, TA), streamExt)
+#     })
+# 
+# # whrpaths <- paste('whr', whrnames, sep='/')
+# # whrlist <- lapply(whrpaths, function(fn) shapefile(file.path(datapath, fn)))
+# 
+# whrlistTA[[1]]$forest <- 'Plumas'
+# whrlistTA[[2]]$forest <- 'Lassen'
+# #whrlistTA[[3]]$forest <- 'Tahoe'
+# 
+# 
+# 
+# whr <- do.call(bind, whrlistTA)
+# 
+# saveRDS(whr, file.path(datapath, 'processed/whr.RDS'))
+# shapefile(whr, file.path(datapath, 'processed/shapefiles/whr.shp'))
 
 
 # WHR Processing ----------------------------------------------------------
@@ -87,6 +92,7 @@ ras$whrdensity <- recodeBlank(ras$whrdensity)
 # WHR Size ----------------------------------------------------------------
 
 ras$whrsize <- overChr(ras, whr,'WHRSIZE') #194 NAs 
+ras$forest <- overChr(ras, whr,'forest') #194 NAs 
 
 ras$whrsize <- recodeBlank(ras$whrsize)
 
