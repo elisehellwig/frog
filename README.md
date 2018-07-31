@@ -4,7 +4,7 @@ This repository is the code repository for a maximum entropy species distributio
 
 All data is stored in frogData/data. Documentation for the data can be found in frogData/documentation.
 
-__Required R Packages:__ dismo, ggplot2, raster, rgdal, rgeos, sp
+__Required R Packages:__ dismo, DMwR, ggplot2, raster, rgdal, rgeos, sp
 
 *Note: In order to run the maxent model in the 'dismo' package, you will also need to load the 'rJava' package.
 
@@ -28,7 +28,7 @@ __2_ProcessSoils.R__ This script import a soil dataset provided by previous peop
 	
  * Input files: 
 
-	* frog_model/data/output/MergedSoilsClipFinal.shp
+	* raw/soils/MergedSoilsClipFinal.shp
 	* processed/RasiStreamLines1.RDS
 	* processed/missingSoilsKey.csv
 
@@ -40,7 +40,7 @@ __3_CleanWHR.R__ This script imports three data layers from the CWHRVg and uses 
 
  * Input files: 
 
- 	* frogData/data/frog_model/data/datasets/cwhr_4Megan/CWHRVg.gdb (all layers)
+ 	* raw/CWHRVg.gdb (all layers)
  	* processed/RasiStreamLines2.RDS
  	* processed/TypeAggregationScheme.csv
 	
@@ -52,12 +52,12 @@ __4_ProcessDEM.R__ *NOTE: This script only needs to be run once, not everytime d
  * Input files: 
 
  	* processed/RasiStreamLines3.RDS
- 	* DEM/n40w120/floatn40w120_13.flt 
- 	* DEM/n40w121/floatn40w121_13.flt 
- 	* DEM/USGS_NED_13_n40w122_GridFloat/usgs_ned_13_n40w122_gridfloat.flt
- 	* DEM/n41w120/floatn41w120_13.flt 
- 	* DEM/n41w121/floatn41w121_13.flt 
- 	* DEM/n41w122/floatn41w122_13.flt
+ 	* raw/DEM/n40w120/floatn40w120_13.flt 
+ 	* raw/DEM/n40w121/floatn40w121_13.flt 
+ 	* raw/DEM/USGS_NED_13_n40w122_GridFloat/usgs_ned_13_n40w122_gridfloat.flt
+ 	* raw/DEM/n41w120/floatn41w120_13.flt 
+ 	* raw/DEM/n41w121/floatn41w121_13.flt 
+ 	* raw/DEM/n41w122/floatn41w122_13.flt
 
  * Output files: 
 
@@ -76,6 +76,14 @@ __5_finalCleaning.R__ This script takes the extracted DEM/geography data, collap
 
 ### Modeling 
 
-__1_Exploration.R__ This 
+__1_Exploration.R__ *Note: Not necessary to run.* This script uses randomForest to attempt to parse out which variables are the most predictive of frog presence, without the assumptions of Maximum Entropy. 
+
+ * Input files: processed/RasiStreamDF.csv
+
+__2_Maxent.R__ *Note: Not necessary to run.* This script runs a number of models, some with more variables, some with less, to try and get a sense of how best to fit and score the MaxEnt models when doing variable selection and model evaluation. The last model run has some variable selection as a test run.
+ 
+ * processed/RasiStreamDF.csv
+
+__3_ModelSelection.R__ This 
 
 
