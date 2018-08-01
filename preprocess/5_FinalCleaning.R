@@ -10,7 +10,7 @@ library(rgeos)
 
 
 #saving the path where data is stored as a variable for later use
-datapath <- '/Users/echellwig/Research/frogData/data/'
+datapath <- '/Volumes/GoogleDrive/My Drive/OtherPeople/frogData/data'
 funpath <- '/Users/echellwig/Research/frog/functions/'
 
 source(file.path(funpath, 'preprocess.R'))
@@ -18,6 +18,7 @@ source(file.path(funpath, 'preprocess.R'))
 
 #loading DEM values for each of the stream reaches
 demdf <- readRDS(file.path(datapath, 'processed/extractedDEMvalues.RDS'))
+rockkey <- read.csv(file.path(datapath, 'processed/rockclassification.csv'))
 
 #loading stream reach spatiallinesdataframe
 ras <- readRDS(file.path(datapath, 'processed/RasiStreamLines3.RDS'))
@@ -84,7 +85,8 @@ ras$y <- sapply(seq_along(rasicoords), function(i) {
 ras$perennial <- ifelse(ras$fcode=='46006', 1, 0)
 ras$south <- ifelse(grepl('S', ras$cardinal), 1, 0)
 
-
+ras$hard <- recodeDF(ras$ptype, rockkey, 'geoclass','hard')
+ras$rocktype <- recodeDF(ras$ptype, rockkey, 'geoclass','rocktype')
 
 # Subset rows/columns ------------------------------------------------------
 
@@ -94,10 +96,11 @@ ras <- ras[NAids, ]
 
 
 #the variables we want that are not precipitation or temperature
-rnames1 <- c('comid', 'state', 'rasi', 'length', 'elevmax', 
+rnames1 <- c('comid', 'source', 'rasi', 'length', 'elevmax', 
              'elevmin', 'slopemax', 'slopemin', 'slopemean', 'cardinal',  
              'fcode', 'streamorde', 'ptype', 'soiltype', 'whrtype',
-             'totdasqkm', 'divdasqkm','south','perennial','x', 'y',)
+             'totdasqkm', 'divdasqkm','south','perennial','x', 'y', 'hard',
+             'rocktype')
 
 
 #creating names of precip and temp variables
@@ -117,11 +120,11 @@ names(rasfinal)[c(1, 11:17)] <- c('id', 'seasonality','streamOrder',
                                   'bedrock','soil','habitat','totDrainArea',
                                   'divDrainArea')
 
-#really making sure we don't have any NAs
+#really making sure we don't have any NAs (there are 7 in bedrock)
 cc <- complete.cases(data.frame(rasfinal))
 rasfinal <- rasfinal[cc, ]
 
-rasdf <- data.frame(ras)
+rasdf <- data.frame(rasfinal)
 # write files -------------------------------------------------------------
 
 
