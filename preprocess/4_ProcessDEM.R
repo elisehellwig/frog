@@ -16,7 +16,7 @@ library(rgeos)
 
 
 #saving the path where data is stored as a variable for later use
-datapath <- '/Users/echellwig/Research/frogData/data/'
+datapath <- '/Volumes/GoogleDrive/My Drive/OtherPeople/frogData/data'
 funpath <- '/Users/echellwig/Research/frog/functions/'
 
 #importing functions for preprocessing of data
