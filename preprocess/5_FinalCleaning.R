@@ -23,6 +23,8 @@ rockkey <- read.csv(file.path(datapath, 'processed/rockclassification.csv'))
 #loading stream reach spatiallinesdataframe
 ras <- readRDS(file.path(datapath, 'processed/RasiStreamLines3.RDS'))
 
+biorasi <- read.csv(file.path(datapath, 'processed/BioRasiDF.csv'))
+
 
 # Collapse DEM Variables ---------------------------------------------------
 
@@ -88,6 +90,8 @@ ras$south <- ifelse(grepl('S', ras$cardinal), 1, 0)
 ras$hard <- recodeDF(ras$ptype, rockkey, 'geoclass','hard')
 ras$rocktype <- recodeDF(ras$ptype, rockkey, 'geoclass','rocktype')
 
+
+
 # Subset rows/columns ------------------------------------------------------
 
 #removing habitat types that are NA
@@ -124,9 +128,17 @@ names(rasfinal)[c(1, 11:17)] <- c('id', 'seasonality','streamOrder',
 cc <- complete.cases(data.frame(rasfinal))
 rasfinal <- rasfinal[cc, ]
 
-rasdf <- data.frame(rasfinal)
-# write files -------------------------------------------------------------
 
+# Adding Bioclim variables ------------------------------------------------
+
+bio <- getData('worldclim', var='bio', res=0.5, lon=-121, lat=39)
+names(bio) <- gsub('_11', '', names(bio))
+biorasi <- extract(bio, rasfinal, fun=mean)
+biorasi <- as.data.frame(biorasi)
+
+rasdf <- data.frame(rasfinal)
+rasdf <- cbind(rasdf, biorasi)
+# write files -------------------------------------------------------------
 
 
 saveRDS(rasfinal, file.path(datapath, 'processed/RasiStreamLinesFinal.RDS'))
