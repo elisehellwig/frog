@@ -1,47 +1,96 @@
 library(raster)
 library(rgdal)
 library(randomForest)
+library(dplyr)
+library(dismo)
+library(DMwR)
 
-datapath <- '/Users/echellwig/Research/frogData/data/'
+datapath <- '/Volumes/GoogleDrive/My Drive/OtherPeople/frogData/data'
+funpath <- '/Users/echellwig/Research/frog/functions/'
 
-#rasi <- readRDS(file.path(datapath, 'processed/RasiStreamLinesFinal.RDS'))
+source(file.path(funpath, 'fitting.R'))
+source(file.path(funpath, 'modeval.R'))
+
+rasiSP <- readRDS(file.path(datapath, 'processed/RasiStreamLinesFinal.RDS'))
 rasi <- read.csv(file.path(datapath,'processed/RasiStreamDF.csv'))
 
-vars <- names(rasi)
-
-rasi$pa <- factor(rasi$rasi)
-
-
-# Subset Absences ---------------------------------------------------------
-
-pres <- which(rasi$rasi==1)
-abse <- which(rasi$rasi==0)
-
-set.seed(28303020)
-subAbs <- sample(abse, 100)
-
-subsetIDs <- c(pres, subAbs)
-
-rasiSub <- rasi[subsetIDs, ]
 
 # Variable Selection ------------------------------------------------------
 
+#rasi$rasi <- as.factor(rasi$rasi)
 
-rasiclim <- rasiSub[,c(18:98)]
+rasi5000 <- rasi[rasi$elevmax>1524, ]
 
-rasiSubf <- rasiSub
-rasiSubf$rasi <- factor(rasiSub$rasi)
+fullvars <- c('rasi', 'length','elevmax', 'elevmin','slopemin', 
+              'slopemax','slopemean',
+              'totDrainArea', 'divDrainArea','south','perennial', 'x','y',
+              'hard', paste0('bio', 1:19))
+
+
+rasirf <- rasi5000[,fullvars]
+
 
 set.seed(203943)
-rasirff <- randomForest(rasi ~ ., data=rasiSubf[,3:97])
+fold <- kfold(rasirf, 5, by=rasirf$rasi)
+test <- rasirf[fold==1, ]
+train <- rasirf[fold!=1, ]
 
-vars1 <- c(vars[3:17],'tmaxq1min','pptq4max','tmaxq2min')
-rasi1 <- rasi[, vars1]
+mefull <- maxent(x=train[,-1], p=train$rasi)
+fullpred <- predictPres(mefull, test, prob=0.7)
 
-rf1 <- randomForest(rasi ~ ., data=rasi1)
-
-
-# MaxEnt attempt ----------------------------------------------------------
+metric(fullpred, test$rasi, type='PPV')
+metric(fullpred, test$rasi, type='NPV')
 
 
+impOrd <- order(importance(rffull), decreasing=TRUE)
+importance(rffull)[impOrd,]
+
+
+vars1 <- c('rasi', 'y','x', 'length','divDrainArea','bio8','slopemin',
+           'elevmin','bio13','bio6','bio11')
+rasi1 <- rasirf[,vars1]
+train1 <- rasi1[fold!=1, ]
+test1 <- rasi1[fold==1,]
+
+me1 <- maxent(x=train1[,-1], p=train1$rasi)
+pred1 <- predictPres(me1, test1, prob=0.65)
+metric(pred1, test1$rasi, type='PPV')
+
+
+
+# SMOTE Maxent attempt --------------------------------------------------------
+
+factorvars <- c('rasi','hard','south','perennial')
+rasif <- rasirf
+
+for (var in factorvars) {
+    rasif[, var] <- as.factor(rasif[,var])
+}
+
+set.seed(192838)
+
+test <- rasif[fold==1, ]
+train <- rasif[fold!= 1,]
+trainS <- SMOTE(rasi ~ ., data=rasif)
+
+
+meS <- maxent(trainS[,-1], trainS$rasi)
+predS <-  predictPres(meS, test, 0.6)
+metric(predS, FtoN(test$rasi), type='PPV')
+metric(predS, FtoN(test$rasi), type='confusionMatrix')
+
+
+
+# Mild Variable Selection -------------------------------------------------
+
+dropvars <- c('bio1', 'bio7', 'bio10','bio16','bio17','bio18','bio19')
+
+rasi2 <- rasirf %>% select(-dropvars)
+
+test2 <- rasi2[fold==1, ]
+train2 <- rasi2[fold!=1, ]
+
+me2 <- maxent(x=train2[,-1], p=train2$rasi)
+pred2 <- predictPres(me2, test2, prob=0.7)
+metric(pred2, test2$rasi, type='PPV')
 
