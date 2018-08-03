@@ -53,9 +53,9 @@ undersampleMaxent <- function(train, test, n, reps, seed=NA, colname='rasi') {
         subabs(train, colname, n)
     })
     
-    mods <- lapply(trainsub, function(df) {
+    mods <- lapply(1:length(trainsub), function(i) {
         print(i)
-        maxent(df[,-responseID], df[,colname])
+        maxent(trainsub[[i]][,-responseID], trainsub[[i]][,colname])
     })
     
     probs <- data.frame(sapply(mods, function(m) {
