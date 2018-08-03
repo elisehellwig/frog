@@ -2,8 +2,9 @@
 metric <- function(predicted, observed, type='accuracy') {
     tab <- table(predicted, observed)
     
-    actualNo <- sum(tab[1,])
-    predNo <- sum(tab[,1])
+    if (nrow(tab)==1) {
+        tab <- rbind(tab, c(0,0))
+    }
     
     total <- sum(tab)
     
@@ -16,8 +17,10 @@ metric <- function(predicted, observed, type='accuracy') {
     } else if (type=='specificity') { #When it's actually no, how often does it 
         met <- tab[1,1]/sum(tab[,1])   #predict no? 
         
-    } else if (type=='PPV') { #positive predictive value: when it is predicts 
+    } else if (type=='PPV') { #positive predictive value: when it is predicts
         met <- tab[2,2]/sum(tab[2,]) #yes, how often is it yes
+        
+        if (!is.finite(met)) met <- 0
     
     } else if (type=='NPV') {#negative predictive value: when it predicts no, 
         met <- tab[1,1]/sum(tab[1,]) # how often is it no
@@ -30,12 +33,13 @@ metric <- function(predicted, observed, type='accuracy') {
         stop('Metric type given is not recognized.')
     }
     
+
     return(met)
 }
 
 
 crossval <- function(df, errormetric='PPV', k=5, seed=NA, avg=TRUE,
-                     threshold=0.5) {
+                     threshold=0.5, smote=FALSE) {
     require(dismo)
     
     if (!is.na(seed)) {
@@ -46,8 +50,13 @@ crossval <- function(df, errormetric='PPV', k=5, seed=NA, avg=TRUE,
     error <- rep(NA, k)
     
     for (i in 1:k) {
-        train <- df[fold!=i, ]
+        
         test <- df[fold==i, ]
+        train <- df[fold!=i, ]
+        
+        if (smote) {
+            train <- smote(rasi ~ ., train)
+        } 
         
         mod <- maxent(x=train[,-grep('rasi', names(train))],
                       p=train$rasi)
@@ -67,4 +76,14 @@ crossval <- function(df, errormetric='PPV', k=5, seed=NA, avg=TRUE,
         return(error)
     }
 }
+
+
+FtoN <- function(v) {
+    ch <- as.character(v)
+    n <- as.numeric(ch)
+    
+    return(n)
+}
+
+
 
