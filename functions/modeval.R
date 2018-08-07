@@ -29,6 +29,8 @@ metric <- function(predicted, observed, type='accuracy') {
         met <- tab
         names(attributes(tab)$dimnames) <- c('predicted','observed')
         
+    } else if (type=='TruePos') {
+        met <- tab[2,2]
     } else {
         stop('Metric type given is not recognized.')
     }
@@ -39,15 +41,19 @@ metric <- function(predicted, observed, type='accuracy') {
 
 
 crossval <- function(df, errormetric='PPV', k=5, seed=NA, avg=TRUE,
-                     threshold=0.5, smote=FALSE) {
+                     threshold=0.5, smote=FALSE, arguments=NA) {
     require(dismo)
+    
+    print(threshold)
+    n <- length(errormetric)
     
     if (!is.na(seed)) {
         set.seed(seed)
     }
     
-    fold <- kfold(df, k=k)
-    error <- rep(NA, k)
+    #print(1)
+    fold <- kfold(df, k=k, by=df$rasi)
+    error <- matrix(NA, nrow=k, ncol=n)
     
     for (i in 1:k) {
         
@@ -55,23 +61,38 @@ crossval <- function(df, errormetric='PPV', k=5, seed=NA, avg=TRUE,
         train <- df[fold!=i, ]
         
         if (smote) {
-            train <- smote(rasi ~ ., train)
+            #print(2)
+            if (!is.na(arguments[1])) {
+                train <- SMOTE(rasi ~ ., train, args=arguments)
+            } else {
+                train <- SMOTE(rasi ~ ., train)
+            }
+            
         } 
         
-        mod <- maxent(x=train[,-grep('rasi', names(train))],
-                      p=train$rasi)
+        #print(grep('rasi', names(train)))
+        if (!is.na(arguments[1])) {
+            mod <- maxent(x=train[,-grep('rasi', names(train))],
+                          p=train$rasi, args=arguments) 
+        } else {
+            mod <- maxent(x=train[,-grep('rasi', names(train))],
+                          p=train$rasi)
+        }
+       
         
         testprediction <- predictPres(mod, test, threshold)
         
-        error[i] <- metric(testprediction, 
-                           test$rasi,
-                           type=errormetric)
         
+        
+        error[i,] <- sapply(errormetric, function(met) {
+            metric(testprediction, test$rasi,type=met)
+        })
         
     } 
     
     if (avg) {
-        return(mean(error))
+        meanerror <- apply(error, 2, mean)
+        return(meanerror)
     } else {
         return(error)
     }
