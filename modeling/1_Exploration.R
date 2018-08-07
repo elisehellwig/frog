@@ -94,3 +94,23 @@ me2 <- maxent(x=train2[,-1], p=train2$rasi)
 pred2 <- predictPres(me2, test2, prob=0.7)
 metric(pred2, test2$rasi, type='PPV')
 
+
+# Adding Factors ----------------------------------------------------------
+
+facvars <- c('rasi','length','elevmin','divDrainArea') 
+facrasi <- rasi5000[, facvars]
+
+
+mef <- maxent(facrasi[,-1], facrasi$rasi)
+
+
+pa <- data.frame(alt=runif(100, 0, 1000),
+                temp=rpois(100, 5),
+                #aspect=sample(c('N','S','E','W'), 100, replace=TRUE),
+                presence=sample(0:1, 100, replace=TRUE))
+
+me <- maxent(x=pa[,-3], p=pa$presence)
+
+
+
+
