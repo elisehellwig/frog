@@ -17,6 +17,7 @@ ras <- readRDS(file.path(datapath, 'processed/RasiStreamLines2.RDS'))
 typeAgg <- read.csv(file.path(datapath,
                               'processed/TypeAggregationScheme.csv'))
 
+
 TA <- CRS('+proj=aea +lat_1=34 +lat_2=40.5 +lat_0=0 +lon_0=-120 +x_0=0 +y_0=-4000000 +ellps=GRS80 +datum=NAD83 +units=m +no_defs ')
 
 
@@ -27,15 +28,22 @@ TA <- CRS('+proj=aea +lat_1=34 +lat_2=40.5 +lat_0=0 +lon_0=-120 +x_0=0 +y_0=-400
 # streamTA <- spTransform(ras, TA)
 # streamExt <- extent(streamTA)
 # 
-# whrpath <- file.path(datapath, 'raw/WHR/CWHRVg.gdb')
+# #setting up paths
+# whrpath1 <- file.path(datapath, 'raw/WHR/CWHRVg.gdb')
 # whrpath2 <- file.path(datapath, 'raw/WHR/TNFWHR')
-# whrlayers <- ogrListLayers(whrpath)[-3]
+# whrpath <- c(whrpath1, whrpath1, whrpath2)
+# 
+# #setting up layers
+# whrlayers <- ogrListLayers(whrpath[1])[-3]
 # attributes(whrlayers) <- NULL
+# whrlayers <- c(whrlayers, "Area_Lidar_1acre")
 # 
 # #ogrListLayers
-# whrlist <- lapply(whrlayers, function(l) {
-#     readOGR(dsn=whrpath, layer=l, stringsAsFactors = FALSE)
+# whrlist <- lapply(seq_along(whrlayers), function(i) {
+#     readOGR(dsn=whrpath[i], layer=whrlayers[i], stringsAsFactors = FALSE)
 # })
+# 
+# 
 # 
 # whrlistTA <- lapply(whrlist, function(spdf) {
 #     crop(spTransform(spdf, TA), streamExt)
@@ -46,27 +54,26 @@ TA <- CRS('+proj=aea +lat_1=34 +lat_2=40.5 +lat_0=0 +lon_0=-120 +x_0=0 +y_0=-400
 # 
 # whrlistTA[[1]]$forest <- 'Plumas'
 # whrlistTA[[2]]$forest <- 'Lassen'
-# #whrlistTA[[3]]$forest <- 'Tahoe'
-# 
-# 
+# whrlistTA[[3]]$forest <- 'Tahoe'
 # 
 # whr <- do.call(bind, whrlistTA)
 # 
 # saveRDS(whr, file.path(datapath, 'processed/whr.RDS'))
-# shapefile(whr, file.path(datapath, 'processed/shapefiles/whr.shp'))
-
-
-# WHR Processing ----------------------------------------------------------
-
-#read in merged file
-whr <- readRDS(file.path(datapath, 'processed/whr.RDS'))
-whr <- spTransform(whr, crs(ras))
+# shapefile(whr, file.path(datapath, 'processed/shapefiles/whr.shp'),
+#           overwrite=TRUE)
+# 
+# 
+# # WHR Processing ----------------------------------------------------------
+# 
+# #read in merged file
+# whr <- readRDS(file.path(datapath, 'processed/whr.RDS'))
+# whr <- spTransform(whr, crs(ras))
 
 
 # WHR Type ----------------------------------------------------------------
 
 
-## All 70 observations with NAs for whrtype have no rasi presence
+## 92 observations with NAs for whrtype, 91 have no rasi presence
 ## Merging with lifeform and covertype does not eliminate these nas
 
 
