@@ -55,6 +55,9 @@ typehist2 <- ggplot(data=typedf[typedf$code!='SMC',]) +
 densname <- c('D: 60-100% Closed','M: 40-59% Closed','P: 25-39% Closed',
               'S: 10-24% Closed','X: Not Specified in Metadata')
 
+
+
+
 densdf <- data.frame(name=densname,
                      whr=table(ras$whrdensity)) #n=2705
 names(densdf) <- c('name','code','count')
@@ -134,6 +137,16 @@ coverhist <- ggplot(data=coverdf) +
          title='Number of stream reaches by cover type, n=2622') +
     theme_bw(16) + 
     theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+
+
+
+
+# Plot by Forest  ---------------------------------------------------------
+
+
+
+
+
 
 
 
