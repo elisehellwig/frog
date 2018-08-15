@@ -18,7 +18,8 @@ source(file.path(funpath, 'preprocess.R'))
 
 #loading DEM values for each of the stream reaches
 demdf <- readRDS(file.path(datapath, 'processed/extractedDEMvalues.RDS'))
-rockkey <- read.csv(file.path(datapath, 'processed/rockclassification.csv'))
+rockkey <- read.csv(file.path(datapath, 'processed/rockclassification.csv'),
+                    stringsAsFactors = FALSE)
 
 #loading stream reach spatiallinesdataframe
 ras <- readRDS(file.path(datapath, 'processed/RasiStreamLines3.RDS'))
@@ -107,11 +108,13 @@ rnames1 <- c('comid', 'source', 'rasi', 'length', 'elevmax',
              'rocktype')
 
 
+
 #creating names of precip and temp variables
 var <- rep(c('ppt','tmax','tmin','tmean'), each=20)
 quarter <- rep(rep(paste0('q', 1:4), each=5), 4)
 sumstat <- rep(c('min','max','beg','end','lwm'), 16)
 rnames2 <- paste0(var, quarter, sumstat)
+
 
 #all the variables we want
 rnames <- c(rnames1, rnames2)
