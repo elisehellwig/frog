@@ -25,60 +25,68 @@ TA <- CRS('+proj=aea +lat_1=34 +lat_2=40.5 +lat_0=0 +lon_0=-120 +x_0=0 +y_0=-400
 
 ##Only need to run this once
 
-# streamTA <- spTransform(ras, TA)
-# streamExt <- extent(streamTA)
-# 
-# #setting up paths
-# whrpath1 <- file.path(datapath, 'raw/WHR/CWHRVg.gdb')
-# whrpath2 <- file.path(datapath, 'raw/WHR/TNFWHR')
-# whrpath <- c(whrpath1, whrpath1, whrpath2)
-# 
-# #setting up layers
-# whrlayers <- ogrListLayers(whrpath[1])[-3]
-# attributes(whrlayers) <- NULL
-# whrlayers <- c(whrlayers, "Area_Lidar_1acre")
-# 
-# #ogrListLayers
-# whrlist <- lapply(seq_along(whrlayers), function(i) {
-#     readOGR(dsn=whrpath[i], layer=whrlayers[i], stringsAsFactors = FALSE)
-# })
-# 
-# 
-# 
-# whrlistTA <- lapply(whrlist, function(spdf) {
-#     crop(spTransform(spdf, TA), streamExt)
-#     })
-# 
-# # whrpaths <- paste('whr', whrnames, sep='/')
-# # whrlist <- lapply(whrpaths, function(fn) shapefile(file.path(datapath, fn)))
-# 
-# whrlistTA[[1]]$forest <- 'Plumas'
-# whrlistTA[[2]]$forest <- 'Lassen'
-# whrlistTA[[3]]$forest <- 'Tahoe'
-# 
-# whr <- do.call(bind, whrlistTA)
-# 
-# saveRDS(whr, file.path(datapath, 'processed/whr.RDS'))
-# shapefile(whr, file.path(datapath, 'processed/shapefiles/whr.shp'),
-#           overwrite=TRUE)
-# 
-# 
+streamTA <- spTransform(ras, TA)
+streamExt <- extent(streamTA)
+
+#setting up paths
+whrpath1 <- file.path(datapath, 'raw/WHR/CWHRVg.gdb')
+whrpath2 <- file.path(datapath, 'raw/WHR/TNFWHR')
+whrpath <- c(whrpath1, whrpath1, whrpath2)
+
+#setting up layers
+whrlayers <- ogrListLayers(whrpath[1])[-3]
+attributes(whrlayers) <- NULL
+whrlayers <- c(whrlayers, "Area_Lidar_1acre")
+
+#ogrListLayers
+whrlist <- lapply(seq_along(whrlayers), function(i) {
+    readOGR(dsn=whrpath[i], layer=whrlayers[i], stringsAsFactors = FALSE)
+})
+
+
+
+whrlistTA <- lapply(whrlist, function(spdf) {
+    crop(spTransform(spdf, TA), streamExt)
+    })
+
+# whrpaths <- paste('whr', whrnames, sep='/')
+# whrlist <- lapply(whrpaths, function(fn) shapefile(file.path(datapath, fn)))
+
+whrlistTA[[1]]$forest <- 'Plumas'
+whrlistTA[[2]]$forest <- 'Lassen'
+whrlistTA[[3]]$forest <- 'Tahoe'
+
+whr <- do.call(bind, whrlistTA)
+
+saveRDS(whr, file.path(datapath, 'processed/whr.RDS'))
+shapefile(whr, file.path(datapath, 'processed/shapefiles/whr.shp'),
+          overwrite=TRUE)
+
+
+tahoeAlt <- readOGR(dsn=whrpath1, layer=ogrListLayers(whrpath1)[3],
+                    stringsAsFactors = FALSE)
+
+
 # # WHR Processing ----------------------------------------------------------
 # 
-# #read in merged file
-# whr <- readRDS(file.path(datapath, 'processed/whr.RDS'))
-# whr <- spTransform(whr, crs(ras))
-
+#read in merged file
+whr <- readRDS(file.path(datapath, 'processed/whr.RDS'))
+whr <- spTransform(whr, crs(ras))
+tahoeAlt <- spTransform(tahoeAlt, crs(ras))
 
 # WHR Type ----------------------------------------------------------------
 
 
-## 92 observations with NAs for whrtype, 91 have no rasi presence
+## 70 observations with NAs for whrtype, all have no rasi presence
 ## Merging with lifeform and covertype does not eliminate these nas
 
 
 
 ras$whrtype <- overChr(ras, whr, 'WHRTYPE') 
+whralt <- overChr(ras, tahoeAlt, 'WHRTYPE')
+updaterows <- which(is.na(ras$whrtype) & (!is.na(whralt)))
+
+ras$whrtype[updaterows] <- whralt[updaterows] 
 
 ras$whrtype <- recodeDF(ras$whrtype, typeAgg)
 
