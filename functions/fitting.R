@@ -69,3 +69,121 @@ undersampleMaxent <- function(train, test, n, reps, seed=NA, colname='rasi') {
 }
 
 
+
+
+isModFactor <- function(v, trueFactorsOnly=FALSE) {
+    
+    
+    fctr <- FALSE
+    
+    if (trueFactorsOnly) {
+        if (is.factor(v)) {
+            fctr <- TRUE
+        } 
+        
+    } else { 
+        
+        vals <- unique(v)
+        dif <- setdiff(vals, c(0,1))
+        
+         if (is.factor(v) | length(dif)==0) {
+            fctr <- TRUE
+         }
+    }
+    
+    return(fctr)
+    
+}
+
+
+modFactors <- function(df, returnIDs=FALSE, trueFactorsOnly=FALSE) {
+    
+    isF <- sapply(1:ncol(df), function(i) {
+        isModFactor(df[,i], trueFactorsOnly)
+    })
+    
+    FIDS <- which(isF)
+    
+    Fnames <- names(df)[FIDS]
+    
+    if (returnIDs) {
+        return(FIDS)
+    } else {
+        return(Fnames)
+    }
+    
+}
+
+expandFactors <- function(df, responsevar) {
+    
+    fmla <- as.formula(paste(responsevar, '~ .'))
+    mat1 <- model.matrix(fmla, data=df)[,-1]
+    df1 <- as.data.frame(mat1)
+    df1 <- cbind(df[,responsevar], df1)
+    names(df1)[1] <- 'rasi'
+    
+    
+    if (is.factor(df[,responsevar])) {
+        rvid <- which(names(df)==responsevar)
+        factors <- modFactors(df, trueFactorsOnly = TRUE)[-rvid]
+    } else {
+        factors <- modFactors(df, trueFactorsOnly = TRUE)
+    }
+    
+    
+    firstlevels <- sapply(factors, function(v) {
+        print(class(df[,v]))
+        levels(df[,v])[1]
+    })
+    
+    print(firstlevels)
+    
+    firstcols <- sapply(1:length(firstlevels), function(i) {
+        vec <- df[, factors[i]]
+        ifelse(vec==firstlevels[i], 1, 0)
+    })
+    
+    df2 <- as.data.frame(firstcols)
+    names(df2) <- firstlevels
+    
+    dffinal <- cbind(df1, df2)
+    
+    return(dffinal)
+}
+
+
+removeNames <- function(df, varnames) {
+    
+    for (name in varnames) {
+        names(df) <- gsub(name, '', names(df))
+    }
+    
+    return(df)
+}
+
+
+
+convertFactors <- function(df, exclude=NA, varnames=NA) {
+    
+    #print(str(df))
+    factornames <- modFactors(df)
+    
+    if (!is.na(exclude[1])) {
+        factornames <- setdiff(factornames, exclude)
+    }
+    
+    for (name in factornames) {
+        df[, name] <- as.factor(df[,name])
+    }
+    
+    if (!is.na(varnames[1])) {
+        df <- removeNames(df, varnames)
+        
+    }
+    
+    
+    
+    return(df)
+    
+}
+
