@@ -23,7 +23,7 @@ rockkey <- read.csv(file.path(datapath, 'processed/rockclassification.csv'),
 
 #loading stream reach spatiallinesdataframe
 ras <- readRDS(file.path(datapath, 'processed/RasiStreamLines3.RDS'))
-
+#rasr <-readRDS(file.path(datapath, 'processed/RasiStreamLines3reduced.RDS'))
 biorasi <- read.csv(file.path(datapath, 'processed/BioRasiDF.csv'))
 
 
@@ -91,7 +91,7 @@ ras$south <- ifelse(grepl('S', ras$cardinal), 1, 0)
 ras$hard <- recodeDF(ras$ptype, rockkey, 'geoclass','hard')
 ras$rocktype <- recodeDF(ras$ptype, rockkey, 'geoclass','rocktype')
 
-
+ras$fcode <- ifelse(ras$fcode=='46006', 'perennial', 'intermittent')
 
 # Subset rows/columns ------------------------------------------------------
 
@@ -103,9 +103,9 @@ ras <- ras[NAids, ]
 #the variables we want that are not precipitation or temperature
 rnames1 <- c('comid', 'source', 'rasi', 'length', 'elevmax', 
              'elevmin', 'slopemax', 'slopemin', 'slopemean', 'cardinal',  
-             'fcode', 'streamorde', 'ptype', 'soiltype', 'whrtype',
-             'totdasqkm', 'divdasqkm','south','perennial','x', 'y', 'hard',
-             'rocktype')
+             'fcode', 'streamorde', 'ptype', 'soiltype', 'whrtype', 'whrsize',
+             'whrdensity', 'totdasqkm', 'divdasqkm','south','perennial','x', 
+             'y', 'hard', 'rocktype')
 
 
 
@@ -123,13 +123,20 @@ rnames <- c(rnames1, rnames2)
 rasfinal <- ras[, rnames]
 
 #renaming a couple of confusingly named columns
-names(rasfinal)[c(1, 11:17)] <- c('id', 'seasonality','streamOrder',
-                                  'bedrock','soil','habitat','totDrainArea',
+names(rasfinal)[c(1, 11:19)] <- c('id', 'seasonality','streamOrder',
+                                  'bedrock','soil','habitat', 'treesize',
+                                  'canopyClosure', 'totDrainArea',
                                   'divDrainArea')
+
+rasfinal2 <- rasfinal
+rasfinal2 <- rasfinal2[,-(16:17)]
 
 #really making sure we don't have any NAs (there are 7 in bedrock)
 cc <- complete.cases(data.frame(rasfinal))
 rasfinal <- rasfinal[cc, ]
+
+cc2 <- complete.cases(data.frame(rasfinal2))
+rasfinal2 <- rasfinal2[cc2, ]
 
 
 # Adding Bioclim variables ------------------------------------------------
@@ -137,10 +144,17 @@ rasfinal <- rasfinal[cc, ]
 bio <- getData('worldclim', var='bio', res=0.5, lon=-121, lat=39)
 names(bio) <- gsub('_11', '', names(bio))
 biorasi <- extract(bio, rasfinal, fun=mean)
+biorasi2 <- extract(bio, rasfinal2, fun=mean)
+
 biorasi <- as.data.frame(biorasi)
+biorasi2 <- as.data.frame(biorasi2)
+
 
 rasdf <- data.frame(rasfinal)
+rasdf2 <- data.frame(rasfinal2)
+
 rasdf <- cbind(rasdf, biorasi)
+rasdf2 <- cbind(rasdf2, biorasi2)
 # write files -------------------------------------------------------------
 
 
@@ -151,3 +165,11 @@ shapefile(rasfinal, file.path(datapath,
 write.csv(rasdf, file.path(datapath, 'processed/RasiStreamDF.csv'),
           row.names = FALSE)
 
+
+write.csv(rasdf2, file.path(datapath, 'processed/RasiStreamDFrowreduced.csv'),
+          row.names = FALSE)
+saveRDS(rasfinal2, file.path(datapath, 
+                             'processed/RasiStreamLinesFinalrowreduced.RDS'))
+shapefile(rasfinal2, file.path(datapath, 
+          'processed/shapefiles/RasiStreamLinesFinalrowreduced.shp'),
+          overwrite=TRUE)
