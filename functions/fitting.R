@@ -132,11 +132,11 @@ expandFactors <- function(df, responsevar) {
     
     
     firstlevels <- sapply(factors, function(v) {
-        print(class(df[,v]))
+        #print(class(df[,v]))
         levels(df[,v])[1]
     })
     
-    print(firstlevels)
+    #print(firstlevels)
     
     firstcols <- sapply(1:length(firstlevels), function(i) {
         vec <- df[, factors[i]]
