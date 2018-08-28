@@ -106,5 +106,32 @@ FtoN <- function(v) {
     return(n)
 }
 
+extractResults <- function(mod, output) {
+    
+    allresults <- mod@results
+    allresultnames <- attributes(allresults)$dimnames[[1]]
+    ids <- grep(output, allresultnames, ignore.case = TRUE)
+
+    resultvec <- allresults[ids]
+    
+    if (length(resultvec)==1) {
+        result <- unname(resultvec)
+        
+    } else {
+        resultnames <- allresultnames[ids]
+        resultnames <- gsub(output, '', resultnames)
+        result <- data.frame(variable=resultnames,
+                             output=unname(resultvec))
+    }
+    
+    return(result)
+    
+}
+
+
+
+
+
+
 
 
