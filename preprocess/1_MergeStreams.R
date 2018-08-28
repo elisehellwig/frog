@@ -55,8 +55,8 @@ streams <- rbind(gbMerge, nsMerge)
 #removing the old rasi pa data
 names(streams) <- gsub('_prese', '', names(streams))
 
-streams$fcode <- recode(streams$fcode, `46006`='perennial', 
-                        `46003`='intermittent', `46000`='other')
+streams$fcode <- dplyr::recode(streams$fcode, `46006`='perennial', 
+                        `46003`='intermittent', `46000`='intermittent')
 
 
 #calculating stream reach length, in km
