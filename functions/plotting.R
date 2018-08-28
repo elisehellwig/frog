@@ -59,3 +59,69 @@ summaryPlot <- function(df, var, groupvar='rasi', type='density', size=12,
     
     return(splot)    
 }
+
+
+summarizePredictor <- function(predictor, response, name='predictor', 
+                               digits=3) {
+
+    summarylist <- tapply(predictor, response, summary)
+    sumdf <- as.data.frame(round(do.call(cbind, summarylist), digits))
+    respnames <- sort(unique(response))
+    names(sumdf) <- paste0(name, respnames)
+
+    return(sumdf)    
+}
+
+
+
+summaryTable <- function(x, response, digits=3, percent=TRUE) {
+    require(reshape2)
+    #print(class(x))
+    
+    Stat <- c('Min', '1st Q ', 'Median','Mean','3rd Q', 'Max')
+    
+    if (is.factor(x) | is.character(x)) {
+        
+        tab1 <-data.frame(table(x, response))
+        names(tab1) <- c('predictorVal','rasi', 'freq')
+        tab <- dcast(tab1, predictorVal ~ rasi, value.var = 'freq')
+        names(tab) <- c('Value','Unoccupied','Ooccupied')
+        
+        if (percent) {
+            
+            tab[,2] <- round(tab[,2]/sum(tab[,2]), digits)
+            tab[,3] <- round(tab[,3]/sum(tab[,3]), digits)
+        }
+        
+    } else if (is.data.frame(x)) {
+        
+        if (length(digits)==1) {
+            digits <- rep(digits, ncol(x))
+        }
+        
+        pnames <- names(x)
+        tablist <- lapply(1:ncol(x), function(i) {
+            summarizePredictor(x[,i], response, pnames[i], digits=digits[i])
+        })
+        
+        tab <- do.call(cbind, tablist)
+        tab <- cbind(Stat, tab)
+        rownames(tab) <- NULL
+        
+        
+    } else {
+        
+        tab <- summarizePredictor(x, response, digits=digits)
+        names(tab) <- c('Unoccupied','Occupied')
+        tab <- cbind(Stat, tab)
+        rownames(tab) <- NULL
+    }
+    
+    
+    return(tab)
+    
+} 
+
+
+
+
