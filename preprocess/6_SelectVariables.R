@@ -49,6 +49,7 @@ rasi2 <- expandFactors(rasi, 'rasi')
 rasi2 <- convertFactors(rasi2, varnames= c('habitat','rocktype',
                                            'canopyClosure'))
 
+rasi2 <- rasi2 %>% select(-aspect)
 
 write.csv(rasi2, file.path(datapath, 'processed/RasiModelDF.csv'),
           row.names = FALSE)
