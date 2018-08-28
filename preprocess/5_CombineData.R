@@ -7,6 +7,7 @@
 library(raster)
 library(rgdal)
 library(rgeos)
+library(circular)
 
 
 #saving the path where data is stored as a variable for later use
@@ -40,32 +41,16 @@ ras$slopemean <- collapseVariable(demdf$slope, demdf$fid, fun = mean)
 
 ##Calculating elevation summary statistics for each reach
 ras$elevmax <- collapseVariable(demdf$layer, demdf$fid, fun = max)
-ras$elevmin <- collapseVariable(demdf$layer, demdf$fid, fun = min)
-
+ras$elevmean <- collapseVariable(demdf$layer, demdf$fid, fun = mean)
 
 # Process Aspect ----------------------------------------------------------
 
-#######create aspect key#######
-
-## aspect values
-vals <- c(0, rep(seq(22.5, 337.5, by=45), 2), 360)
-aspdf <- as.data.frame(matrix(vals, ncol=2))
-
-names(aspdf) <- c('min', 'max')
-
-#IDs 
-aspdf$id <- 1:nrow(aspdf)
-
-#cardinal directions
-aspdf$string <- c('N', 'NE', 'E', "SE",'S','SW','W','NW', 'N')
-
-#convert aspect to character cardinal directions
-ras$cardinal <- sapply(1:length(ras), function(i) {
+ras$aspect <- sapply(1:length(ras), function(i) {
     v <- demdf[demdf$ID==i, 'aspect']
-    vcard <- recodeRange(v, aspdf)
-    getMode(vcard)
-    
+    vc <- circular(v, units='degrees', type='angles', modulo='2pi')
+    round(as.numeric(mean(vc)))
 })
+
 
 
 # Add extra Variables -----------------------------------------------------
@@ -96,10 +81,10 @@ ras <- ras[NAids, ]
 
 #the variables we want that are not biovars
 rnames <- c('comid', 'source', 'rasi', 'length', 'elevmax', 
-             'elevmin', 'slopemax', 'slopemin', 'slopemean', 'cardinal',  
+             'elevmean', 'slopemax', 'slopemin', 'slopemean',  
              'fcode', 'streamorde', 'ptype', 'soiltype', 'whrtype', 'whrsize',
              'whrdensity', 'totdasqkm', 'divdasqkm','x', 'y', 'rocktype',
-             'join_count','join_cou_1')
+             'join_count','join_cou_1','aspect')
 
 
 
@@ -107,7 +92,7 @@ rnames <- c('comid', 'source', 'rasi', 'length', 'elevmax',
 rasfinal <- ras[, rnames]
 
 #renaming a couple of confusingly named columns
-names(rasfinal)[c(1, 11:19,23:24)] <- c('id', 'seasonality','streamOrder',
+names(rasfinal)[c(1, 10:18, 22:23)] <- c('id', 'seasonality','streamOrder',
                                   'bedrock','soil','habitat', 'treesize',
                                   'canopyClosure', 'totDrainArea',
                                   'divDrainArea', 'meadows','waterbodies')
