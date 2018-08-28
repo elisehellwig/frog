@@ -7,30 +7,321 @@ output: pdf_document
 
 ```{r setup, include=FALSE}
 
-datapath <- '/Volumes/GoogleDrive/My Drive/OtherPeople/frogData/data'
+knitr::opts_chunk$set(echo = FALSE)
 
+library(knitr)
+library(reshape2)
+library(kableExtra)
+
+datapath <- '/Volumes/GoogleDrive/My Drive/OtherPeople/frogData/data'
+funpath <- '/Users/echellwig/Research/frog/functions/'
+
+source(file.path(funpath, 'plotting.R'))
+biovarkey <- read.csv(file.path(datapath, 'processed/biovarkey.csv'))
 rasi <- read.csv(file.path(datapath,'processed/RasiStreamDF.csv'))
 rasirr <- read.csv(file.path(datapath,'processed/RasiStreamDFrowreduced.csv'))
 
 
 ```
 
-## R Markdown
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+```{r namevectors}
 
-```{r cars}
-summary(cars)
+demVars <- c('elevmax', 'elevmin', 'slopemax', 'slopemin', 'slopemean')
+streamVars <- c('length', 'streamOrder', 'totDrainArea', 'divDrainArea')
+xyVars <- c('y','x')
+
+biovars <- paste0('bio', 1:19)
+
 ```
 
-## Including Plots
 
-You can also embed plots, for example:
+# Numeric Variables
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r DEMTable}
+
+st1 <- summaryTable(rasi[,demVars], rasi$rasi, digits=c(0,0,3,3,3))
+kable(st1, format = 'latex', booktabs=TRUE, 
+      col.names = c(' ', rep(c('Abs.','Pres.'), 5))) %>%
+    kable_styling(full_width = TRUE) %>%
+    add_header_above(c(" "=1, 'Min Elevation'=2, 'Max Elevation'=2,
+                       'Min Slope'=2, 'Max Slope'=2, 'Mean Slope'=2))
+
+
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+\vspace{0.3in}
+
+```{r streamTable}
+
+st2 <- summaryTable(rasi[,streamVars], rasi$rasi, digits=c(3,0,3,3))
+kable(st2, format = 'latex', booktabs=TRUE, 
+      col.names = c(' ', rep(c('Abs.','Pres.'), 4))) %>%
+    kable_styling(full_width = TRUE) %>%
+    add_header_above(c(" "=1, 'Reach Length'=2, 'Stream Order'=2,
+                       'Total Drainage Area'=2, 'Div. Drainage Area'=2)) 
+
+
+
+
+```
+
+
+\vspace{0.3in}
+
+```{r xyTable}
+
+stxy <- summaryTable(rasi[,xyVars], rasi$rasi, digits=2)
+kable(stxy, format = 'latex', booktabs=TRUE, 
+      col.names = c(' ', rep(c('Abs.','Pres.'), 2))) %>%
+    add_header_above(c(" "=1, 'Latitude'=2, 'Longitude'=2)) 
+
+
+
+
+```
+
+
+# Bioclim Variables
+
+```{r biokey}
+
+kable(biovarkey, format='latex', booktabs=TRUE)
+
+```
+
+\vspace{0.3in}
+
+```{r biotable1}
+
+stbio1 <- summaryTable(rasi[,biovars[1:6]], rasi$rasi, digits=1)
+kable(stbio1, format='latex', booktabs=TRUE, 
+      col.names = c('', rep(c('Abs', 'Pres'), 6))) %>% 
+    add_header_above(c(" "=1, 'Bio1'=2, 'Bio2'=2,"Bio3"=2,'Bio4'=2,'Bio5'=2,
+                     'Bio6'=2)) #%>% 
+    #kable_styling(full_width = TRUE)
+
+```
+
+\vspace{0.3in}
+
+```{r biotable2}
+
+stbio2 <- summaryTable(rasi[,biovars[7:12]], rasi$rasi, digits=1)
+kable(stbio2, format='latex', booktabs=TRUE, 
+      col.names = c('', rep(c('Abs', 'Pres'), 6))) %>% 
+    add_header_above(c(" "=1, 'Bio7'=2, 'Bio8'=2,"Bio9"=2,'Bio10'=2,'Bio11'=2,
+                     'Bio12'=2)) #%>% 
+    #kable_styling(full_width = TRUE)
+
+```
+
+
+
+\vspace{0.3in}
+
+```{r biotable3}
+
+stbio3 <- summaryTable(rasi[,biovars[13:19]], rasi$rasi, digits=1)
+kable(stbio3, format='latex', booktabs=TRUE, 
+      col.names = c('', rep(c('Abs', 'Pres'), 7))) %>% 
+    add_header_above(c(" "=1, 'Bio13'=2, 'Bio14'=2,"Bio15"=2,'Bio16'=2, 
+                       'Bio17'=2, 'Bio18'=2, 'Bio19'=2)) #%>% 
+    #kable_styling(full_width = TRUE)
+
+```
+
+
+# Categorical Variables
+
+## Categorical Variables by Count
+
+```{r cardinaltablecount}
+
+stc <- summaryTable(rasi$cardinal, rasi$rasi, digits=2, percent = FALSE)
+kable(stc, format='latex', booktabs=TRUE, 
+      col.names = c('Aspect','Absent','Present'))
+
+```
+
+
+\vspace{0.2in}
+
+
+```{r soiltablecount}
+
+sts <- summaryTable(rasi$soil, rasi$rasi, digits=2, percent = FALSE)
+kable(sts, format='latex', booktabs=TRUE, 
+      col.names = c('Soil Type','Absent','Present'))
+
+```
+
+
+\vspace{0.2in}
+
+
+```{r habitattablecount}
+
+sth <- summaryTable(rasi$habitat, rasi$rasi, digits=2, percent = FALSE)
+kable(sth, format='latex', booktabs=TRUE, 
+      col.names = c('Habitat Type','Absent','Present'))
+
+```
+
+\vspace{0.2in}
+
+
+```{r sizetablecount}
+
+stsi <- summaryTable(factor(rasirr$treesize), rasirr$rasi, percent = FALSE)
+kable(stsi, format='latex', booktabs=TRUE,
+      col.names = c('Tree Size', 'Absent', 'Present'))
+
+
+```
+
+\vspace{0.2in}
+
+
+```{r covertablecount}
+
+stcc <- summaryTable(rasirr$canopyClosure, rasirr$rasi, percent = FALSE)
+kable(stcc, format='latex', booktabs=TRUE,
+      col.names = c('Closure Class', 'Absent', 'Present'))
+
+
+```
+
+
+\vspace{0.2in}
+
+
+```{r perennialtablecount}
+
+stp <- summaryTable(factor(rasi$perennial), rasi$rasi, digits=2, 
+                    percent = FALSE)
+kable(stp, format='latex', booktabs=TRUE, 
+      col.names = c('Perennial ?','Absent','Present'))
+
+```
+
+
+\vspace{0.2in}
+
+
+```{r rocktypetablecount}
+
+strt <- summaryTable(rasi$rocktype, rasi$rasi, digits=2, percent = FALSE)
+kable(strt, format='latex', booktabs=TRUE, 
+      col.names = c('Rock Type','Absent','Present'))
+
+```
+
+
+\vspace{0.2in}
+
+
+```{r bedrocktablecount}
+
+stb <- summaryTable(rasi$bedrock, rasi$rasi, digits=2, percent = FALSE)
+kable(stb, format='latex', booktabs=TRUE, 
+      col.names = c('Rock Class','Absent','Present'))
+
+```
+
+
+## Categorical Variables by Percentage
+
+```{r cardinaltableperc}
+
+stc <- summaryTable(rasi$cardinal, rasi$rasi, digits=2)
+kable(stc, format='latex', booktabs=TRUE, 
+      col.names = c('Aspect','Absent','Present'))
+
+```
+
+\vspace{0.2in}
+
+
+```{r soiltableperc}
+
+sts <- summaryTable(rasi$soil, rasi$rasi, digits=2)
+kable(sts, format='latex', booktabs=TRUE, 
+      col.names = c('Soil Type','Absent','Present'))
+
+```
+
+
+\vspace{0.2in}
+
+
+```{r habitattableperc}
+
+sth <- summaryTable(rasi$habitat, rasi$rasi, digits=2)
+kable(sth, format='latex', booktabs=TRUE, 
+      col.names = c('Habitat Type','Absent','Present'))
+
+```
+
+\vspace{0.2in}
+
+
+```{r sizetableperc}
+
+stsi <- summaryTable(factor(rasirr$treesize), rasirr$rasi, digits=2)
+kable(stsi, format='latex', booktabs=TRUE,
+      col.names = c('Tree Size', 'Absent', 'Present'))
+
+
+```
+
+\vspace{0.2in}
+
+
+```{r covertableperc}
+
+stcc <- summaryTable(rasirr$canopyClosure, rasirr$rasi, digits=2)
+kable(stcc, format='latex', booktabs=TRUE,
+      col.names = c('Closure Class', 'Absent', 'Present'))
+
+
+```
+
+
+\vspace{0.2in}
+
+
+```{r perennialtableperc}
+
+stp <- summaryTable(factor(rasi$perennial), rasi$rasi, digits=2)
+kable(stp, format='latex', booktabs=TRUE, 
+      col.names = c('Perennial ?','Absent','Present'))
+
+```
+
+
+\vspace{0.2in}
+
+
+```{r rocktypetableperc}
+
+strt <- summaryTable(rasi$rocktype, rasi$rasi, digits=2)
+kable(strt, format='latex', booktabs=TRUE, 
+      col.names = c('Rock Type','Absent','Present'))
+
+```
+
+
+\vspace{0.2in}
+
+
+```{r bedrocktableperc}
+
+stb <- summaryTable(rasi$bedrock, rasi$rasi, digits=2)
+kable(stb, format='latex', booktabs=TRUE, 
+      col.names = c('Rock Class','Absent','Present'))
+
+```
+
+
