@@ -24,7 +24,7 @@ rockkey <- read.csv(file.path(datapath, 'processed/rockclassification.csv'),
 #loading stream reach spatiallinesdataframe
 ras <- readRDS(file.path(datapath, 'processed/RasiStreamLines3.RDS'))
 #rasr <-readRDS(file.path(datapath, 'processed/RasiStreamLines3reduced.RDS'))
-biorasi <- read.csv(file.path(datapath, 'processed/BioRasiDF.csv'))
+#biorasi <- read.csv(file.path(datapath, 'processed/BioRasiDF.csv'))
 
 
 # Collapse DEM Variables ---------------------------------------------------
@@ -85,13 +85,7 @@ ras$y <- sapply(seq_along(rasicoords), function(i) {
     mean(rasicoords[[i]][[1]][,2])
 })
 
-ras$perennial <- ifelse(ras$fcode=='46006', 1, 0)
-ras$south <- ifelse(grepl('S', ras$cardinal), 1, 0)
-
-ras$hard <- recodeDF(ras$ptype, rockkey, 'geoclass','hard')
 ras$rocktype <- recodeDF(ras$ptype, rockkey, 'geoclass','rocktype')
-
-ras$fcode <- ifelse(ras$fcode=='46006', 'perennial', 'intermittent')
 
 # Subset rows/columns ------------------------------------------------------
 
@@ -100,33 +94,23 @@ NAids  <- which(!is.na(ras$whrtype))
 ras <- ras[NAids, ]
 
 
-#the variables we want that are not precipitation or temperature
-rnames1 <- c('comid', 'source', 'rasi', 'length', 'elevmax', 
+#the variables we want that are not biovars
+rnames <- c('comid', 'source', 'rasi', 'length', 'elevmax', 
              'elevmin', 'slopemax', 'slopemin', 'slopemean', 'cardinal',  
              'fcode', 'streamorde', 'ptype', 'soiltype', 'whrtype', 'whrsize',
-             'whrdensity', 'totdasqkm', 'divdasqkm','south','perennial','x', 
-             'y', 'hard', 'rocktype')
+             'whrdensity', 'totdasqkm', 'divdasqkm','x', 'y', 'rocktype',
+             'join_count','join_cou_1')
 
 
-
-#creating names of precip and temp variables
-var <- rep(c('ppt','tmax','tmin','tmean'), each=20)
-quarter <- rep(rep(paste0('q', 1:4), each=5), 4)
-sumstat <- rep(c('min','max','beg','end','lwm'), 16)
-rnames2 <- paste0(var, quarter, sumstat)
-
-
-#all the variables we want
-rnames <- c(rnames1, rnames2)
 
 #subseting the data with the columns we want
 rasfinal <- ras[, rnames]
 
 #renaming a couple of confusingly named columns
-names(rasfinal)[c(1, 11:19)] <- c('id', 'seasonality','streamOrder',
+names(rasfinal)[c(1, 11:19,23:24)] <- c('id', 'seasonality','streamOrder',
                                   'bedrock','soil','habitat', 'treesize',
                                   'canopyClosure', 'totDrainArea',
-                                  'divDrainArea')
+                                  'divDrainArea', 'meadows','waterbodies')
 
 rasfinal2 <- rasfinal
 rasfinal2 <- rasfinal2[,-(16:17)]
@@ -141,13 +125,20 @@ rasfinal2 <- rasfinal2[cc2, ]
 
 # Adding Bioclim variables ------------------------------------------------
 
-bio <- getData('worldclim', var='bio', res=0.5, lon=-121, lat=39)
-names(bio) <- gsub('_11', '', names(bio))
-biorasi <- extract(bio, rasfinal, fun=mean)
-biorasi2 <- extract(bio, rasfinal2, fun=mean)
+# bio <- getData('worldclim', var='bio', res=0.5, lon=-121, lat=39)
+# names(bio) <- gsub('_11', '', names(bio))
+# biorasi <- extract(bio, rasfinal, fun=mean)
+# biorasi2 <- extract(bio, rasfinal2, fun=mean)
+# 
+# biorasi <- as.data.frame(biorasi)
+# biorasi2 <- as.data.frame(biorasi2)
+# 
+# saveRDS(biorasi, file.path(datapath, 'processed/BioVarsRowReduced.RDS'))
+# saveRDS(biorasi2, file.path(datapath, 'processed/BioVars.RDS'))
 
-biorasi <- as.data.frame(biorasi)
-biorasi2 <- as.data.frame(biorasi2)
+biorasi <- readRDS(file.path(datapath, 'processed/BioVarsRowReduced.RDS'))
+biorasi2 <- readRDS(file.path(datapath, 'processed/BioVars.RDS'))
+
 
 
 rasdf <- data.frame(rasfinal)
@@ -155,21 +146,32 @@ rasdf2 <- data.frame(rasfinal2)
 
 rasdf <- cbind(rasdf, biorasi)
 rasdf2 <- cbind(rasdf2, biorasi2)
+
+
+rasdf$meadows <- as.integer(rasdf$meadows)
+rasdf$waterbodies <- as.integer(rasdf$waterbodies)
+rasdf$treesize <- as.integer(rasdf$treesize)
+
+
+rasdf2$meadows <- as.integer(rasdf2$meadows)
+rasdf2$waterbodies <- as.integer(rasdf2$waterbodies)
+
 # write files -------------------------------------------------------------
 
 
-saveRDS(rasfinal, file.path(datapath, 'processed/RasiStreamLinesFinal.RDS'))
-shapefile(rasfinal, file.path(datapath, 
+saveRDS(rasfinal2, file.path(datapath, 'processed/RasiStreamLinesFinal.RDS'))
+shapefile(rasfinal2, file.path(datapath, 
                               'processed/shapefiles/RasiStreamLinesFinal.shp'),
           overwrite=TRUE)
-write.csv(rasdf, file.path(datapath, 'processed/RasiStreamDF.csv'),
+write.csv(rasdf2, file.path(datapath, 'processed/RasiStreamDF.csv'),
           row.names = FALSE)
 
 
-write.csv(rasdf2, file.path(datapath, 'processed/RasiStreamDFrowreduced.csv'),
+write.csv(rasdf, file.path(datapath, 'processed/RasiStreamDFrowreduced.csv'),
           row.names = FALSE)
-saveRDS(rasfinal2, file.path(datapath, 
+saveRDS(rasfinal, file.path(datapath, 
                              'processed/RasiStreamLinesFinalrowreduced.RDS'))
-shapefile(rasfinal2, file.path(datapath, 
+shapefile(rasfinal, file.path(datapath, 
           'processed/shapefiles/RasiStreamLinesFinalrowreduced.shp'),
           overwrite=TRUE)
+
