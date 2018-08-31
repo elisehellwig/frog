@@ -72,11 +72,29 @@ ras$y <- sapply(seq_along(rasicoords), function(i) {
 
 ras$rocktype <- recodeDF(ras$ptype, rockkey, 'geoclass','rocktype')
 
-# Subset rows/columns ------------------------------------------------------
+
+# Subset rows/columns 1 ------------------------------------------------------
 
 #removing habitat types that are NA
 NAids  <- which(!is.na(ras$whrtype))
 ras <- ras[NAids, ]
+
+
+# Deal with Treesize/canopy cover -----------------------------------------
+
+ras[ras$comid==2775158, 'whrdensity'] <- 'P'
+ras[ras$comid==2775182, 'whrdensity'] <- 'D'
+
+missingSize <- which(is.na(ras$whrsize)) 
+ras[missingSize, 'whrsize'] <- 0
+
+missingDens <- which(is.na(ras$whrdensity))
+ras[missingDens, 'whrdensity'] <- 'X'
+
+
+
+
+# More Subsetting ---------------------------------------------------------
 
 
 #the variables we want that are not biovars
@@ -84,7 +102,7 @@ rnames <- c('comid', 'source', 'rasi', 'length', 'elevmax',
              'elevmean', 'slopemax', 'slopemin', 'slopemean',  
              'fcode', 'streamorde', 'ptype', 'soiltype', 'whrtype', 'whrsize',
              'whrdensity', 'totdasqkm', 'divdasqkm','x', 'y', 'rocktype',
-             'join_count','join_cou_1','aspect')
+             'join_count','join_cou_1','aspect','forest')
 
 
 
@@ -97,66 +115,41 @@ names(rasfinal)[c(1, 10:18, 22:23)] <- c('id', 'seasonality','streamOrder',
                                   'canopyClosure', 'totDrainArea',
                                   'divDrainArea', 'meadows','waterbodies')
 
-rasfinal2 <- rasfinal
-rasfinal2 <- rasfinal2[,-(16:17)]
 
 #really making sure we don't have any NAs (there are 7 in bedrock)
 cc <- complete.cases(data.frame(rasfinal))
 rasfinal <- rasfinal[cc, ]
-
-cc2 <- complete.cases(data.frame(rasfinal2))
-rasfinal2 <- rasfinal2[cc2, ]
-
 
 # Adding Bioclim variables ------------------------------------------------
 
 # bio <- getData('worldclim', var='bio', res=0.5, lon=-121, lat=39)
 # names(bio) <- gsub('_11', '', names(bio))
 # biorasi <- extract(bio, rasfinal, fun=mean)
-# biorasi2 <- extract(bio, rasfinal2, fun=mean)
 # 
 # biorasi <- as.data.frame(biorasi)
-# biorasi2 <- as.data.frame(biorasi2)
 # 
-# saveRDS(biorasi, file.path(datapath, 'processed/BioVarsRowReduced.RDS'))
-# saveRDS(biorasi2, file.path(datapath, 'processed/BioVars.RDS'))
+# saveRDS(biorasi, file.path(datapath, 'processed/BioVars.RDS'))
 
-biorasi <- readRDS(file.path(datapath, 'processed/BioVarsRowReduced.RDS'))
-biorasi2 <- readRDS(file.path(datapath, 'processed/BioVars.RDS'))
+biorasi <- readRDS(file.path(datapath, 'processed/BioVars.RDS'))
 
 
 
 rasdf <- data.frame(rasfinal)
-rasdf2 <- data.frame(rasfinal2)
-
 rasdf <- cbind(rasdf, biorasi)
-rasdf2 <- cbind(rasdf2, biorasi2)
 
 
 rasdf$meadows <- as.integer(rasdf$meadows)
 rasdf$waterbodies <- as.integer(rasdf$waterbodies)
-rasdf$treesize <- as.integer(rasdf$treesize)
 
-
-rasdf2$meadows <- as.integer(rasdf2$meadows)
-rasdf2$waterbodies <- as.integer(rasdf2$waterbodies)
 
 # write files -------------------------------------------------------------
 
 
-saveRDS(rasfinal2, file.path(datapath, 'processed/RasiStreamLinesFinal.RDS'))
-shapefile(rasfinal2, file.path(datapath, 
-                              'processed/shapefiles/RasiStreamLinesFinal.shp'),
-          overwrite=TRUE)
-write.csv(rasdf2, file.path(datapath, 'processed/RasiStreamDF.csv'),
-          row.names = FALSE)
-
-
-write.csv(rasdf, file.path(datapath, 'processed/RasiStreamDFrowreduced.csv'),
+write.csv(rasdf, file.path(datapath, 'processed/RasiStreamDF.csv'),
           row.names = FALSE)
 saveRDS(rasfinal, file.path(datapath, 
-                             'processed/RasiStreamLinesFinalrowreduced.RDS'))
+                             'processed/RasiStreamLinesFinal.RDS'))
 shapefile(rasfinal, file.path(datapath, 
-          'processed/shapefiles/RasiStreamLinesFinalrowreduced.shp'),
+          'processed/shapefiles/RasiStreamLinesFinal.shp'),
           overwrite=TRUE)
 
