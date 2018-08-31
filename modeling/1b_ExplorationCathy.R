@@ -1,10 +1,5 @@
-library(raster)
-library(rgdal)
-library(randomForest)
-library(plyr)
-library(dplyr)
 library(dismo)
-library(DMwR)
+library(dplyr)
 
 datapath <- '/Volumes/GoogleDrive/My Drive/OtherPeople/frogData/data'
 funpath <- '/Users/echellwig/Research/frog/functions/'
@@ -16,6 +11,15 @@ source(file.path(funpath, 'modeval.R'))
 rasi <- read.csv(file.path(datapath,'processed/RasiModelDF.csv'))
 rasi <- convertFactors(rasi)
 
+
+
+# Remove Selected Biovars ---------------------------------------------
+
+BioIDs <- c(1,4,5,10,11,12,15,18,19)
+dropBioIDs <- setdiff(1:19, BioIDs)
+dropBios <- paste0('bio', dropBioIDs)
+
+rasi <- rasi %>% select(-dropBios)
 
 
 # Run Fullest model------------------------------------------------------
@@ -32,11 +36,11 @@ fold <- kfold(rasi, 5, by=rasi$rasi)
 test <- rasi[fold==1, ]
 train <- rasi[fold!=1, ]
 
-metrain <- maxent(x=train[,-1], p=train$rasi, 
+trainmod2 <- maxent(x=train[,-1], p=train$rasi, 
                   args=c("defaultprevalence=0.73",
                          "lq2lqptthreshold=50"))
 
-fullpred <- predictPres(metrain, test, prob=0.6)
+fullpred <- predictPres(trainmod2, test, prob=0.6)
 
 metric(fullpred, test$rasi, type='PPV')
 metric(fullpred, test$rasi, type='NPV')
@@ -50,7 +54,6 @@ imp <- extractResults(mefull, '.permutation.importance')
 
 removeIDs <- which(contrib$output==0 | imp$output==0)
 drop1 <- as.character(imp$variable[removeIDs])
-
     
 rasi1 <- rasi %>% select(-drop1)
 
@@ -83,7 +86,6 @@ removeIDs1 <- which(contrib1$output<0.5 | imp1$output<0.5)
 drop2 <- as.character(imp1$variable[removeIDs1])
 
 
-
 rasi2 <- rasi1 %>% select(-drop2)
 
 me2 <- maxent(rasi2[,-1], rasi2$rasi, 
@@ -113,7 +115,6 @@ removeIDs2 <- which(contrib2$output<=1.5 | imp2$output<=1.5)
 
 drop3 <- as.character(imp2$variable[removeIDs2])
 
-
 rasi3 <- rasi2 %>% select(-drop3)
 
 train3 <- rasi3[fold!=1, ]
@@ -128,9 +129,9 @@ pred3 <- predictPres(me3train, test3, prob=0.6)
 metric(pred3, test3$rasi, type='PPV')
 metric(pred3, test3$rasi, type='confusionMatrix')
 
-alldropvars <- Reduce(union, list(drop1, drop2, drop3))
-saveRDS(alldropvars, file.path(datapath, 'processed/uselessVariables.RDS'))
 
+alldropvars <- Reduce(union, list(dropBios, drop1, drop2, drop3))
+saveRDS(alldropvars, file.path(datapath, 'processed/uselessVariablesCathy.RDS'))
 
 # some plots -------------------------------------------------
 allvars1 <- names(rasi1)[-1]

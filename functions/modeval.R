@@ -61,7 +61,7 @@ crossval <- function(df, errormetric='PPV', k=5, seed=NA, avg=TRUE,
         train <- df[fold!=i, ]
         
         if (smote) {
-            #print(2)
+            print(2)
             if (!is.na(arguments[1])) {
                 train <- SMOTE(rasi ~ ., train, args=arguments)
             } else {
@@ -112,12 +112,18 @@ extractResults <- function(mod, output) {
     allresultnames <- attributes(allresults)$dimnames[[1]]
     ids <- grep(output, allresultnames, ignore.case = TRUE)
 
-    resultvec <- allresults[ids]
+    if (length(dim(allresults))==0) {
+        resultvec <- allresults[ids]
+    } else {
+        resultvec <- allresults[ids, ncol(allresults)]
+    }
     
-    if (length(resultvec)==1) {
+    
+    if (length(ids)==1) {
         result <- unname(resultvec)
         
     } else {
+        
         resultnames <- allresultnames[ids]
         resultnames <- gsub(output, '', resultnames)
         result <- data.frame(variable=resultnames,

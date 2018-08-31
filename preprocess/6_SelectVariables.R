@@ -11,7 +11,7 @@ source(file.path(funpath, 'fitting.R'))
 
 rasiraw <- read.csv(file.path(datapath, 'processed/RasiStreamDF.csv'))
 
-dropvars <- c('id','source','slopemin','slopemax', 'soil',
+dropvars <- c('id','source','slopemin','slopemax',
               'bedrock', 'divDrainArea','forest')
 
 # Remove observations -----------------------------------------------------
@@ -51,7 +51,7 @@ rasi$perennial <- as.numeric(ifelse(rasi$perennial=='perennial', 1,0))
 
 rasi2 <- expandFactors(rasi, 'rasi')
 
-rasi2 <- convertFactors(rasi2, varnames= c('habitat','rocktype',
+rasi2 <- convertFactors(rasi2, varnames= c('habitat','rocktype', 'soil',
                                            'canopyClosure','treesize'))
 
 
