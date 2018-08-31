@@ -9,10 +9,10 @@ funpath <- '/Users/echellwig/Research/frog/functions/'
 source(file.path(funpath, 'fitting.R'))
 
 
-rasiraw <- read.csv(file.path(datapath, 'processed/RasiStreamDFrowreduced.csv'))
+rasiraw <- read.csv(file.path(datapath, 'processed/RasiStreamDF.csv'))
 
 dropvars <- c('id','source','slopemin','slopemax', 'soil',
-              'bedrock', 'divDrainArea', 'treesize')
+              'bedrock', 'divDrainArea','forest')
 
 # Remove observations -----------------------------------------------------
 
@@ -39,6 +39,11 @@ rasi$habitat <- recode_factor(rasi$habitat, 'CON'='conifer', 'HDW'='hardwood',
 rasi$canopyClosure <- recode_factor(rasi$canopyClosure, 'D'='dense',
                                     'M'='moderate', 'P'='partial', 'S'='sparse',
                                     'X'='none')
+rasi$treesize <- as.factor(recode(rasi$treesize, `0`='noTrees', 
+                                  `1`='smallTrees', `2`='smallTrees',
+                                  `3`='smallTrees',`4`='largeTrees',
+                                  `5`='largeTrees', `6`='largeTrees'))
+
 
 rasi$perennial <- rasi$seasonality
 rasi$seasonality <- NULL
@@ -47,7 +52,7 @@ rasi$perennial <- as.numeric(ifelse(rasi$perennial=='perennial', 1,0))
 rasi2 <- expandFactors(rasi, 'rasi')
 
 rasi2 <- convertFactors(rasi2, varnames= c('habitat','rocktype',
-                                           'canopyClosure'))
+                                           'canopyClosure','treesize'))
 
 rasi2 <- rasi2 %>% select(-c(aspect,elevmax))
 
