@@ -1,6 +1,6 @@
-library(dplyr)
 library(dismo)
-
+library(dplyr)
+library(ggplot2)
 datapath <- '/Volumes/GoogleDrive/My Drive/OtherPeople/frogData/data'
 funpath <- '/Users/echellwig/Research/frog/functions/'
 
@@ -23,16 +23,25 @@ rasi0$rasi <- as.numeric(as.character(rasi0$rasi))
 #subsetting data to be only some variables 
 rasi <- rasi0 %>% select(-dropvars) 
 
-rasilist <- stratifiedBootstrap(rasi, 100, 'rasi', seed=19293)
 
-modlist <- lapply(rasilist, function(d) {
-    maxent(d[,-1], d$rasi, 
-           args=c("defaultprevalence=0.73", "lq2lqptthreshold=50"))
-})
-
-df <- responseCurve(rasi[,-1], rasi$rasi, modlist, 'waterbodies', 
-                    confidence=0.95)
+# Response curves ---------------------------------------------------------
 
 
+p <- responseCurve(rasi, 'waterbodies', 100, 30, 8752)
+
+pm <- p + labs(x='Waterbodies', y='Predicted Presence Probability') + 
+    theme_bw() + scale_y_continuous(limits=c(0,1))
 
 
+allvars <- names(rasi[,-1])
+
+for (v in allvars) {
+    print(v)
+    p <- responseCurve(rasi, v, 10, 50, 8752)
+    pm <- p + labs(x=v, y='Predicted Presence Probability') + 
+        theme_bw() + scale_y_continuous(limits=c(0,1))
+    filename <- paste0(v, '.png')
+    png(file.path(datapath, 'results/plots/newresponse', filename))
+    print(pm)
+    dev.off()
+}
