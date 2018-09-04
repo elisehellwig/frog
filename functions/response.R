@@ -48,20 +48,18 @@ meanMode <- function(v) {
 
 
 
-responseCurve <- function(x, y, models, varname, nstep=10, stepsize=NA, 
-                          confidence=NA, plot=FALSE) {
+responseVals <- function(x, y, models, varname, nstep=10, confidence=NA) {
     
     varid <- which(names(x)==varname)
     var <- x[,varid]
     
-    rvar <- range(var)
-    
-    if (!is.na(stepsize)) {
-        varseq <- seq(rvar[1], rvar[2], by=stepsize)
+    if (is.factor(var)) {
+        varseq <- levels(var)
     } else {
+        rvar <- range(var)
         varseq <- seq(rvar[1], rvar[2], length.out = nstep)
     }
-
+    
     mu <- sapply(1:ncol(x), function(i) meanMode(x[,i]))
     muvec <- rep(mu, each=length(varseq))
     
@@ -101,5 +99,46 @@ responseCurve <- function(x, y, models, varname, nstep=10, stepsize=NA,
 }
 
 
-
+responseCurve <- function(data, var, reps, nstep, seed=NA, conf=0.95) {
+    
+    originalmod <- maxent(data[,-1], data$rasi,
+                          args=c("defaultprevalence=0.73",
+                                 "lq2lqptthreshold=50"))
+    
+    sbs <- stratifiedBootstrap(data, reps, variable='rasi', seed=seed) 
+    
+    modlist <- lapply(sbs, function(d) {
+        maxent(d[,-1], d$rasi, 
+               args=c("defaultprevalence=0.73", "lq2lqptthreshold=50"))
+    })
+    
+    df <- responseVals(data[,-1], data$rasi, originalmod, 
+                       var, nstep=nstep)
+    
+    cidf <- responseVals(data[,-1], data$rasi, modlist, var, nstep=nstep,
+                         confidence=conf)[,2:3]
+    
+    plotdat <- data.frame(cbind(df, cidf))
+    
+    names(plotdat) <- c('variable', 'response', 'lower','upper')
+    
+    for (i in 2:ncol(plotdat)) {
+        plotdat[,i] <- as.numeric(as.character(plotdat[,i]))
+    }
+    
+    if (is.factor(data[,var])) {
+        rc <- ggplot(data=plotdat) + geom_bar(aes(x=variable, y=response), 
+                                              stat='identity') +
+            geom_errorbar(aes(x=variable, ymin=lower, ymax=upper), width=0.2)
+        
+    } else {
+        rc <- ggplot(data=plotdat) + geom_line(aes(x=variable, y=response)) +
+            geom_ribbon(aes(x=variable, ymax=upper, ymin=lower), alpha=0.4)
+    }
+    
+    
+    
+    return(rc)
+    
+}
 
