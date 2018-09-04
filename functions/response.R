@@ -77,7 +77,7 @@ responseCurve <- function(x, y, models, varname, nstep=10, stepsize=NA,
     if (length(models) > 1) {
         probs <- sapply(models, function(m) predict(m, x=newdat))
     } else {
-        probs <- predict(model, x=newdat)
+        probs <- predict(models, x=newdat)
     }
     
     
