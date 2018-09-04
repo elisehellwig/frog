@@ -1,10 +1,9 @@
 library(raster)
 library(rgdal)
-library(randomForest)
+library(spatstat)
 library(plyr)
 library(dplyr)
 library(dismo)
-library(DMwR)
 
 datapath <- '/Volumes/GoogleDrive/My Drive/OtherPeople/frogData/data'
 funpath <- '/Users/echellwig/Research/frog/functions/'
