@@ -75,7 +75,6 @@ whr <- spTransform(whr, crs(ras))
 tahoeAlt <- spTransform(tahoeAlt, crs(ras))
 
 forestpolys <- aggregate(whr, by='forest')
-saveRDS(forestpolys, file.path(datapath, 'results/forestpolygons.RDS'))
 # WHR Type ----------------------------------------------------------------
 
 
@@ -141,6 +140,8 @@ ras$covertype[which(ras$covertype=='XXX')] <- NA
 
 
 # Save File ---------------------------------------------------------------
+
+saveRDS(forestpolys, file.path(datapath, 'results/forestpolygons.RDS'))
 
 saveRDS(ras, file.path(datapath, 'processed/RasiStreamLines3.RDS'))
 shapefile(ras, file.path(datapath, 
