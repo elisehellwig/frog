@@ -11,9 +11,9 @@ source(file.path(funpath, 'modeval.R'))
 
 
 #rasiSP <- readRDS(file.path(datapath, 'processed/RasiStreamLinesFinal.RDS'))
+rr <- read.csv(file.path(datapath,'processed/RasiResultsDF.csv'))
 rasi <- read.csv(file.path(datapath,'processed/RasiModelDF.csv'))
-dropvars <- readRDS(file.path(datapath, 'processed/uselessVariables.RDS'))
-dropvarsC <- readRDS(file.path(datapath, 'processed/uselessVariablesCathy.RDS'))
+dropvars <- readRDS(file.path(datapath, 'processed/uselessVariablesCathy.RDS'))
 
 
 rasi <- convertFactors(rasi)
@@ -23,18 +23,17 @@ rasi$rasi <- as.numeric(as.character(rasi$rasi))
 
 #subsetting data to be only some variables 
 rasi1 <- rasi %>% select(-dropvars) 
-rasi1c <- rasi %>% select(-dropvarsC)
 
 mod <- maxent(rasi1[,-1], rasi1$rasi, 
               args=c("defaultprevalence=0.73","responsecurves=true",
-                     "replicates=10","lq2lqptthreshold=50"))
+                     "lq2lqptthreshold=50"))
 
-modC <- maxent(rasi1c[,-1], rasi1c$rasi,
-               args=c("defaultprevalence=0.73","responsecurves=true",
-                      "replicates=10","lq2lqptthreshold=50"))
+rr$prob <- predict(mod, rasi1)
+rr$predicted <- predictPres(mod, rasi1, prob=0.7)
 
-saveRDS(mod, file.path(datapath, 'results/models/EliseModel.RDS'))
-saveRDS(modC, file.path(datapath, 'results/models/CathyModel.RDS'))
+saveRDS(mod, file.path(datapath, 'results/models/ModelFinal.RDS'))
+write.csv(rr, file.path(datapath, 'results/RasiResultsDF.csv'),
+          row.names = FALSE)
 
 
 # Cross-Validating -------------------------------------------------
@@ -50,20 +49,8 @@ cvdf1 <- data.frame(threshold=thresholds,
                     TruePos=round(cvthresh1[,2]))
 
 
-cvthreshC <- t(sapply(thresholds, function(th) {
-    crossval(rasi1c, seed=928191, threshold=th, errormetric=c('PPV','TruePos'),
-             arguments=c('defaultprevalence=0.73', 'lq2lqptthreshold=50'))
-}))
 
-cvdfC <- data.frame(threshold=thresholds,
-                    PPV=round(cvthreshC[,1],3),
-                    TruePos=round(cvthreshC[,2]))
-
-
-
-write.csv(cvdf1, file.path(datapath, 'results/CrossValidationModelE.csv'),
-          row.names = FALSE)
-write.csv(cvdfC, file.path(datapath, 'results/CrossValidationModelC.csv'),
+write.csv(cvdf1, file.path(datapath, 'results/CrossValidationModelFinal.csv'),
           row.names = FALSE)
 
 # Response Plots ----------------------------------------------
