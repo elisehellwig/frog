@@ -77,6 +77,7 @@ __5_CombineData.R__ This script takes the extracted DEM/geography data, collapse
 
 
  * Output files: 
+
  	* processed/RasiStreamLinesFinal.RDS
  	* processed/shapefiles/RasiStreamLinesFinal.shp
  	* processed/RasiStreamDF.csv
@@ -92,14 +93,35 @@ __6_SelectVariables.R__ This script selects the final variables and observations
 
 ### Modeling 
 
-__1_VariableSelction.R__ *Note: Not necessary to run.* This script uses randomForest to attempt to parse out which variables are the most predictive of frog presence, without the assumptions of Maximum Entropy. 
+__1_VariableSelction.R__ This script uses backward variable selection to identify the maxent model with the best positive predictive value (PPV). First it removes bioclim variables that are not deemed to be relevant to *R. sierrae*'s biology. Next it fits a model with all of the variables included. Then it calculates the PPV of a set of test data and a probability threshold of 0.6. Finally it removes all variables from the dataset with a contribution or a permutation importance of 0. It repeats this process until the PPV of the test data fails to increase. For each iteration, the required variable importance increases in the following sequence: 0, 0.5, 1.5, 2. Then the model with the highest PPV is selected to be used in the analysis. What is actually saved is the variables that need to be dropped from the RasiModelDF file in order to have only the variables from the chosen model.
 
- * Input files: processed/RasiStreamDF.csv
+ * Input files: processed/RasiModelDF.csv
 
-__2_Crossvalidation.R__ *Note: Not necessary to run.* This script runs a number of models, some with more variables, some with less, to try and get a sense of how best to fit and score the MaxEnt models when doing variable selection and model evaluation. The last model run has some variable selection as a test run.
+ * Output files: results/DroppedVariables.RDS
+
+
+__2_Crossvalidation.R__ This script runs full the model selected in the previous script and saves the probabilities predicted to RasiResultsDF.csv. It also uses 5-fold crossvalidation, with the positive predictive value (PPV) as the metric, to evaluate possible threshold probability values. These are saved to CrossValidationModelFinal.csv. 
+
+runs a number of models, some with more variables, some with less, to try and get a sense of how best to fit and score the MaxEnt models when doing variable selection and model evaluation. The last model run has some variable selection as a test run.
  
- * processed/RasiStreamDF.csv
+ * Input files: 
+
+ 	* processed/RasiModelDF.csv
+ 	* results/DroppedVariables.RDS
+ 	* results/RasiResultsDF.csv
+
+
+ * Output files:
+
+ 	* results/models/ModelFinal.RDS
+ 	* results/RasiResultsDF.csv
+ 	 * results/CrossValidationModelFinal.csv
+
 
 __3_ResponseCurves.R__ This 
+
+
+### Plots
+
 
 
