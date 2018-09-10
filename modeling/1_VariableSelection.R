@@ -134,10 +134,8 @@ me3 <-  maxent(x=rasi3[,-1], p=rasi3$rasi,
                args=c("defaultprevalence=0.73", 'responsecurves=true',
                       "lq2lqptthreshold=50"))
 
-rasi3 <- rasi %>% select(-alldropvars)
-
 alldropvars <- Reduce(union, list(dropBios, drop1, drop2, drop3))
-saveRDS(alldropvars, file.path(datapath, 'processed/uselessVariablesCathy.RDS'))
+saveRDS(alldropvars, file.path(datapath, 'results/DroppedVariables.RDS'))
 
 
 # Variable selection 4 ----------------------------------------------------
