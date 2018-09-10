@@ -11,11 +11,12 @@ source(file.path(funpath, 'fitting.R'))
 
 rasiraw <- read.csv(file.path(datapath, 'processed/RasiStreamDF.csv'))
 
-dropvars <- c('id','source','slopemin','slopemax',
+dropvars <- c('source','slopemin','slopemax',
               'bedrock', 'divDrainArea','forest')
 
 # Remove observations -----------------------------------------------------
 
+#removing low elevation observations brings us down to 2060
 rasi <- rasiraw %>% 
     filter(elevmax>=1524) %>% 
     select(-dropvars)
@@ -55,9 +56,32 @@ rasi2 <- convertFactors(rasi2, varnames= c('habitat','rocktype', 'soil',
                                            'canopyClosure','treesize'))
 
 
+# Adding/subtracting topographical vars -----------------------------------
+
+
 rasi2$xy <- rasi2$x * rasi2$y
 
 rasi2 <- rasi2 %>% select(-c(aspect,elevmax))
 
-write.csv(rasi2, file.path(datapath, 'processed/RasiModelDF.csv'),
+
+# Transforming variables --------------------------------------------------
+
+
+rasi2$totDrainArea <- sqrt(rasi2$totDrainArea)
+rasi2$waterbodies <- sqrt(rasi2$waterbodies)
+
+# Removing outliers -------------------------------------------------------
+#this takes us down to 2057
+
+levIDs <- which(rasi2$totDrainArea>30 | rasi2$waterbodies > 8) 
+rasi2 <- rasi2[-levIDs,]
+
+
+
+rasi3 <- select(rasi2, -id)
+
+write.csv(rasi3, file.path(datapath, 'processed/RasiModelDF.csv'),
           row.names = FALSE)
+write.csv(rasi2, file.path(datapath, 'processed/RasiResultsDF.csv'),
+          row.names = FALSE)
+
