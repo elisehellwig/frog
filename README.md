@@ -6,11 +6,6 @@ All data is stored in frogData/data. Documentation for the data can be found in 
 
 __Required R Packages:__ dismo, ggplot2, raster, rgdal, rgeos, rJava, sp
 
-<<<<<<< HEAD
-=======
-*Note: In order to run the maxent model in the 'dismo' package, you will also need to load the 'rJava' package.*
->>>>>>> 768d4950b29f09b66365ef6803d82e5031078809
-
 ## Files
 
 ### Preprocessing 
@@ -88,19 +83,11 @@ __5_CombineData.R__ This script takes the extracted DEM/geography data, collapse
 
 __6_SelectVariables.R__ This script selects the final variables and observations that will be used in the maxent modeling. First it removes all observations with a maximum elevation of less than 1524m (5000ft), so as to remove any observations of *Rana boylii*. It uses the aspect variable to create four binary direction variables (south, west, southwest, and southeast). It collapses the WHR categorical variables so that they create fewer binary variables and converts any categorical variables into a series binary variables. The script then transforms the number of waterbodies and number of meadows to deal with high leverage points and removes 3 exessively high leverage points that are resistant to transformation. Finally the observation ID is removed for the file that will be used in the modeling.
 
-<<<<<<< HEAD
  * Input files: processed/RasiStreamDF.csv
 
  * Output files: 
  	* processed/RasiModelDF.csv
 	* processed/RasiResultsDF.csv (contains observation ID)
-=======
-	* Input files: processed/RasiStreamDF.csv
-
-	* Output files: 
-		* processed/RasiModelDF.csv
-		* processed/RasiResultsDF.csv (contains observation ID)
->>>>>>> 768d4950b29f09b66365ef6803d82e5031078809
 
 
 ### Modeling 
