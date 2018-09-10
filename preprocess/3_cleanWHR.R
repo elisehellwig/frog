@@ -74,6 +74,8 @@ whr <- readRDS(file.path(datapath, 'processed/whr.RDS'))
 whr <- spTransform(whr, crs(ras))
 tahoeAlt <- spTransform(tahoeAlt, crs(ras))
 
+forestpolys <- aggregate(whr, by='forest')
+saveRDS(forestpolys, file.path(datapath, 'results/forestpolygons.RDS'))
 # WHR Type ----------------------------------------------------------------
 
 
