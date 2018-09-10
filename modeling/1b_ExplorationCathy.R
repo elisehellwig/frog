@@ -13,13 +13,14 @@ rasi <- convertFactors(rasi)
 
 
 
-# Remove Selected Biovars ---------------------------------------------
+# Remove Selected Vars ---------------------------------------------
 
 BioIDs <- c(1,4,5,10,11,12,15,18,19)
 dropBioIDs <- setdiff(1:19, BioIDs)
 dropBios <- paste0('bio', dropBioIDs)
 
 rasi <- rasi %>% select(-dropBios)
+
 
 
 # Run Fullest model------------------------------------------------------
@@ -129,9 +130,39 @@ pred3 <- predictPres(me3train, test3, prob=0.6)
 metric(pred3, test3$rasi, type='PPV')
 metric(pred3, test3$rasi, type='confusionMatrix')
 
+me3 <-  maxent(x=rasi3[,-1], p=rasi3$rasi, 
+               args=c("defaultprevalence=0.73", 'responsecurves=true',
+                      "lq2lqptthreshold=50"))
+
+rasi3 <- rasi %>% select(-alldropvars)
 
 alldropvars <- Reduce(union, list(dropBios, drop1, drop2, drop3))
 saveRDS(alldropvars, file.path(datapath, 'processed/uselessVariablesCathy.RDS'))
+
+
+# Variable selection 4 ----------------------------------------------------
+
+
+contrib3 <- extractResults(me3,'.contribution')
+imp3<- extractResults(me3, '.permutation.importance')
+
+removeIDs3 <- which(contrib3$output<=2 | imp3$output<=2)
+
+drop4 <- as.character(imp3$variable[removeIDs3])
+
+rasi4 <- rasi3 %>% select(-drop4)
+
+train4 <- rasi4[fold!=1, ]
+test4 <- rasi4[fold==1,]
+
+
+me4train <- maxent(x=train4[,-1], p=train4$rasi, 
+                   args=c("defaultprevalence=0.73", 
+                          "lq2lqptthreshold=50"))
+pred4 <- predictPres(me4train, test4, prob=0.6)
+metric(pred4, test4$rasi, type='PPV')
+metric(pred4, test4$rasi, type='confusionMatrix')
+
 
 # some plots -------------------------------------------------
 allvars1 <- names(rasi1)[-1]
