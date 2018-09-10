@@ -24,8 +24,7 @@ rockkey <- read.csv(file.path(datapath, 'processed/rockclassification.csv'),
 
 #loading stream reach spatiallinesdataframe
 ras <- readRDS(file.path(datapath, 'processed/RasiStreamLines3.RDS'))
-#rasr <-readRDS(file.path(datapath, 'processed/RasiStreamLines3reduced.RDS'))
-#biorasi <- read.csv(file.path(datapath, 'processed/BioRasiDF.csv'))
+
 
 
 # Collapse DEM Variables ---------------------------------------------------
