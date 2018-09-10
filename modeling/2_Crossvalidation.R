@@ -13,7 +13,7 @@ source(file.path(funpath, 'modeval.R'))
 #rasiSP <- readRDS(file.path(datapath, 'processed/RasiStreamLinesFinal.RDS'))
 rr <- read.csv(file.path(datapath,'processed/RasiResultsDF.csv'))
 rasi <- read.csv(file.path(datapath,'processed/RasiModelDF.csv'))
-dropvars <- readRDS(file.path(datapath, 'processed/uselessVariablesCathy.RDS'))
+dropvars <- readRDS(file.path(datapath, 'results/DroppedVariables.RDS'))
 
 
 rasi <- convertFactors(rasi)
@@ -23,6 +23,11 @@ rasi$rasi <- as.numeric(as.character(rasi$rasi))
 
 #subsetting data to be only some variables 
 rasi1 <- rasi %>% select(-dropvars) 
+
+
+# Running the model -------------------------------------------------------
+
+
 
 mod <- maxent(rasi1[,-1], rasi1$rasi, 
               args=c("defaultprevalence=0.73","responsecurves=true",
@@ -52,15 +57,3 @@ cvdf1 <- data.frame(threshold=thresholds,
 
 write.csv(cvdf1, file.path(datapath, 'results/CrossValidationModelFinal.csv'),
           row.names = FALSE)
-
-# Response Plots ----------------------------------------------
-
-allvars22 <- names(rasi2)[-1]
-
-for (v in allvars22) {
-    filename <- paste0(v, '.png')
-    png(file.path(datapath, 'results/plots/response22', filename))
-    response(mod2, var=v)
-    dev.off()
-}
-
