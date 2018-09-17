@@ -135,7 +135,18 @@ extractResults <- function(mod, output) {
 }
 
 
-
+keepVariables <- function(model, imp) {
+    
+    contrib <- extractResults(model,'.contribution')
+    perm <- extractResults(model,'.permutation.importance')
+    
+    keepIDs <- which(contrib$output>imp & perm$output>imp)
+    
+    keepvars <- as.character(perm$variable[keepIDs])
+    
+    return(keepvars)
+    
+}
 
 
 
