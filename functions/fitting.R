@@ -76,6 +76,11 @@ isModFactor <- function(v, trueFactorsOnly=FALSE) {
     
     fctr <- FALSE
     
+    
+    if (class(v)=='SpatialLinesDataFrame') {
+        v <- v@data[,1]
+    }
+    
     if (trueFactorsOnly) {
         if (is.factor(v)) {
             fctr <- TRUE
@@ -83,6 +88,7 @@ isModFactor <- function(v, trueFactorsOnly=FALSE) {
         
     } else { 
         
+        #print(str(v))
         vals <- unique(v)
         dif <- setdiff(vals, c(0,1))
         
@@ -172,9 +178,20 @@ convertFactors <- function(df, exclude=NA, varnames=NA) {
         factornames <- setdiff(factornames, exclude)
     }
     
-    for (name in factornames) {
-        df[, name] <- as.factor(df[,name])
+    
+    if (class(df[,1])=='SpatialLinesDataFrame') {
+        
+        for (name in factornames) {
+            df@data[, name] <- as.factor(df@data[,name])
+        } 
+        
+    } else {
+        for (name in factornames) {
+            df[, name] <- as.factor(df[,name])
+        }
     }
+    
+    
     
     if (!is.na(varnames[1])) {
         df <- removeNames(df, varnames)
