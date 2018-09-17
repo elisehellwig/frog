@@ -22,7 +22,6 @@ dropBios <- paste0('bio', dropBioIDs)
 rasi <- rasi %>% select(-dropBios)
 
 
-
 # Run Fullest model------------------------------------------------------
 
 #rasi$rasi <- as.factor(rasi$rasi)
@@ -31,135 +30,83 @@ mefull <- maxent(x=rasi[,-1], p=rasi$rasi,
                  args=c("defaultprevalence=0.73","responsecurves=true",
                         "replicates=10","lq2lqptthreshold=50"))
 
-set.seed(203943)
-fold <- kfold(rasi, 5, by=rasi$rasi)
 
-test <- rasi[fold==1, ]
-train <- rasi[fold!=1, ]
-
-trainmod2 <- maxent(x=train[,-1], p=train$rasi, 
-                  args=c("defaultprevalence=0.73",
-                         "lq2lqptthreshold=50"))
-
-fullpred <- predictPres(trainmod2, test, prob=0.6)
-
-metric(fullpred, test$rasi, type='PPV')
-metric(fullpred, test$rasi, type='NPV')
-
+mefullcv <- crossval(rasi, seed=203943, threshold=0.6,
+                     arguments=c("defaultprevalence=0.73", 
+                                 "lq2lqptthreshold=50"))
 
 
 # First variable selection ---------------------------------------------------
 
-contrib <- extractResults(mefull,'.contribution')
-imp <- extractResults(mefull, '.permutation.importance')
-
-removeIDs <- which(contrib$output==0 | imp$output==0)
-drop1 <- as.character(imp$variable[removeIDs])
-    
-rasi1 <- rasi %>% select(-drop1)
-
-train1 <- rasi1[fold!=1, ]
-test1 <- rasi1[fold==1,]
+keep1 <- keepVariables(mefull, 0)
+ 
+rasi1 <- rasi %>% select(c('rasi', keep1))
 
 me1 <- maxent(x=rasi1[,-1], p=rasi1$rasi,
               args=c("defaultprevalence=0.73","responsecurves=true",
                      "replicates=10","lq2lqptthreshold=50"))
 
 
-me1train <- maxent(x=train1[,-1], p=train1$rasi, 
-                   args=c("defaultprevalence=0.73", 
-                          "lq2lqptthreshold=50"))
-
-pred1 <- predictPres(me1train, test1, prob=0.6)
-metric(pred1, test1$rasi, type='PPV')
-metric(pred1, test1$rasi, type='confusionMatrix')
+me1cv <- crossval(rasi1, seed=203943, threshold=0.6,
+                     arguments=c("defaultprevalence=0.73", 
+                                 "lq2lqptthreshold=50"))
 
 
 # Second variable selection -----------------------------------------------
 
 
 
-contrib1 <- extractResults(me1,'.contribution')
-imp1<- extractResults(me1, '.permutation.importance')
+
+keep2 <- keepVariables(me1, 0.5)
 
 
-removeIDs1 <- which(contrib1$output<0.5 | imp1$output<0.5)
-drop2 <- as.character(imp1$variable[removeIDs1])
-
-
-rasi2 <- rasi1 %>% select(-drop2)
+rasi2 <- rasi1 %>% select(c('rasi', keep2))
 
 me2 <- maxent(rasi2[,-1], rasi2$rasi, 
               args=c("defaultprevalence=0.73","responsecurves=true",
                      "replicates=10","lq2lqptthreshold=50"))
 
 
-train2 <- rasi2[fold!=1, ]
-test2 <- rasi2[fold==1,]
-
-
-me2train <- maxent(x=train2[,-1], p=train2$rasi, 
-                   args=c("defaultprevalence=0.73", 
-                          "lq2lqptthreshold=50"))
-
-pred2 <- predictPres(me2train, test2, prob=0.6)
-metric(pred2, test2$rasi, type='PPV')
-metric(pred2, test2$rasi, type='confusionMatrix')
+me2cv <- crossval(rasi2, seed=203943, threshold=0.6,
+                  arguments=c("defaultprevalence=0.73", 
+                              "lq2lqptthreshold=50"))
 
 
 # Third Variable selection ------------------------------------------------
 
-contrib2 <- extractResults(me2,'.contribution')
-imp2<- extractResults(me2, '.permutation.importance')
+keep3 <- keepVariables(me2, 1.5)
 
-removeIDs2 <- which(contrib2$output<=1.5 | imp2$output<=1.5)
-
-drop3 <- as.character(imp2$variable[removeIDs2])
-
-rasi3 <- rasi2 %>% select(-drop3)
-
-train3 <- rasi3[fold!=1, ]
-test3 <- rasi3[fold==1,]
-
-
-me3train <- maxent(x=train3[,-1], p=train3$rasi, 
-                   args=c("defaultprevalence=0.73", 
-                          "lq2lqptthreshold=50"))
-
-pred3 <- predictPres(me3train, test3, prob=0.6)
-metric(pred3, test3$rasi, type='PPV')
-metric(pred3, test3$rasi, type='confusionMatrix')
+rasi3 <- rasi2 %>% select(c('rasi', keep3))
 
 me3 <-  maxent(x=rasi3[,-1], p=rasi3$rasi, 
-               args=c("defaultprevalence=0.73", 'responsecurves=true',
+               args=c("defaultprevalence=0.73", "replicates=10", 
                       "lq2lqptthreshold=50"))
 
-alldropvars <- Reduce(union, list(dropBios, drop1, drop2, drop3))
-saveRDS(alldropvars, file.path(datapath, 'results/DroppedVariables.RDS'))
+
+me3cv <- crossval(rasi3, seed=203943, threshold=0.6,
+                        arguments=c("defaultprevalence=0.73", 
+                                    "lq2lqptthreshold=50"))
+
+
+chosenvars <- c('rasi', keep3)
+write.csv(chosenvars, file.path(datapath, 'results/SelectedVariables.csv'),
+          row.names = FALSE)
 
 
 # Variable selection 4 ----------------------------------------------------
 
 
-contrib3 <- extractResults(me3,'.contribution')
-imp3<- extractResults(me3, '.permutation.importance')
+keep4 <- keepVariables(me3, 3)
 
-removeIDs3 <- which(contrib3$output<=2 | imp3$output<=2)
+rasi4 <- rasi3 %>% select(c('rasi', keep4))
 
-drop4 <- as.character(imp3$variable[removeIDs3])
+me4cv <- crossval(rasi4, seed=203943, threshold=0.6,
+                  arguments=c("defaultprevalence=0.73", 
+                              "lq2lqptthreshold=50"))
 
-rasi4 <- rasi3 %>% select(-drop4)
-
-train4 <- rasi4[fold!=1, ]
-test4 <- rasi4[fold==1,]
-
-
-me4train <- maxent(x=train4[,-1], p=train4$rasi, 
-                   args=c("defaultprevalence=0.73", 
-                          "lq2lqptthreshold=50"))
-pred4 <- predictPres(me4train, test4, prob=0.6)
-metric(pred4, test4$rasi, type='PPV')
-metric(pred4, test4$rasi, type='confusionMatrix')
+me4 <-  maxent(x=rasi4[,-1], p=rasi4$rasi, 
+               args=c("defaultprevalence=0.73", "replicates=10", 
+                      "lq2lqptthreshold=50"))
 
 
 # some plots -------------------------------------------------
