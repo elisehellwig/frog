@@ -93,11 +93,11 @@ __6_SelectVariables.R__ This script selects the final variables and observations
 
 ### Modeling 
 
-__1_VariableSelction.R__ This script uses backward variable selection to identify the maxent model with the best positive predictive value (PPV). First it removes bioclim variables that are not deemed to be relevant to *R. sierrae*'s biology. Next it fits a model with all of the variables included. Then it calculates the PPV of a set of test data and a probability threshold of 0.6. Finally it removes all variables from the dataset with a contribution or a permutation importance of 0. It repeats this process until the PPV of the test data fails to increase. For each iteration, the required variable importance increases in the following sequence: 0, 0.5, 1.5, 2. Then the model with the highest PPV is selected to be used in the analysis. What is actually saved is the variables that need to be dropped from the RasiModelDF file in order to have only the variables from the chosen model.
+__1_VariableSelction.R__ This script uses backward variable selection to identify the maxent model with the best positive predictive value (PPV). First it removes bioclim variables that are not deemed to be relevant to *R. sierrae*'s biology. Next it fits a model with all of the variables included. Then it calculates the PPV of a set of test data and a probability threshold of 0.6. Finally it removes all variables from the dataset with a contribution or a permutation importance of 0. It repeats this process until the PPV of the test data fails to increase. For each iteration, the required variable importance increases in the following sequence: 0, 0.5, 1.5, 3. Then the model with the highest PPV is selected to be used in the analysis. What is actually saved is a list of variables included in the model in SelectedVariables.csv.
 
  * Input files: processed/RasiModelDF.csv
 
- * Output files: results/DroppedVariables.RDS
+ * Output files: results/SelectedVariables.csv
 
 
 __2_Crossvalidation.R__ This script runs full the model selected in the previous script and saves the probabilities predicted to RasiResultsDF.csv. It also uses 5-fold crossvalidation, with the positive predictive value (PPV) as the metric, to evaluate possible threshold probability values. These are saved to CrossValidationModelFinal.csv. 
