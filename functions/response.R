@@ -15,10 +15,9 @@ stratifiedBootstrap <- function(data, reps, variable, seed=NA) {
         sample(absIDs, length(absIDs), replace=TRUE)
     })
     
-    
+
     datalist <- lapply(1:reps, function(i) {
-        ids <- c(presBS[[i]], absBS[[i]])
-        
+        ids <- unlist(c(presBS[[i]], absBS[[i]]))
         data[ids, ]
     })
     
@@ -83,9 +82,11 @@ responseVals <- function(x, y, models, varname, nstep=10, confidence=NA) {
         ci1 <- ifelse(confidence>0.5, (1-confidence)/2, confidence/2) 
         ci2 <- 1-ci1
         
-        probs2 <- t(sapply(1:nrow(probs), function(i) {
+        probs1 <- t(sapply(1:nrow(probs), function(i) {
             quantile(probs[i,], c(ci1, ci2))
         }))
+        
+        probs2 <- cbind(probs, probs1)
     } else {
         probs2 <- probs
     }
@@ -99,43 +100,64 @@ responseVals <- function(x, y, models, varname, nstep=10, confidence=NA) {
 }
 
 
-responseCurve <- function(data, var, reps, nstep, seed=NA, conf=0.95) {
+responseCurve <- function(data, var, reps, nstep, seed=NA, conf=0.95,
+                          plot=TRUE) {
     
+    print(1)
     originalmod <- maxent(data[,-1], data$rasi,
                           args=c("defaultprevalence=0.73",
                                  "lq2lqptthreshold=50"))
     
+    print(2)
     sbs <- stratifiedBootstrap(data, reps, variable='rasi', seed=seed) 
     
+    
+    print(3)
     modlist <- lapply(sbs, function(d) {
         maxent(d[,-1], d$rasi, 
                args=c("defaultprevalence=0.73", "lq2lqptthreshold=50"))
     })
     
+    
+    print(4)
     df <- responseVals(data[,-1], data$rasi, originalmod, 
                        var, nstep=nstep)
     
+    print(5)
     cidf <- responseVals(data[,-1], data$rasi, modlist, var, nstep=nstep,
                          confidence=conf)[,2:3]
     
     plotdat <- data.frame(cbind(df, cidf))
     
-    names(plotdat) <- c('variable', 'response', 'lower','upper')
+    names(plotdat) <- c('value', 'response', 'lower','upper')
     
+    
+    print(6)
     for (i in 2:ncol(plotdat)) {
         plotdat[,i] <- as.numeric(as.character(plotdat[,i]))
     }
     
-    if (is.factor(data[,var])) {
-        rc <- ggplot(data=plotdat) + geom_bar(aes(x=variable, y=response), 
-                                              stat='identity') +
-            geom_errorbar(aes(x=variable, ymin=lower, ymax=upper), width=0.2)
+    print(7)
+    if (plot) {
+        if (is.factor(data[,var])) {
+            rc <- ggplot(data=plotdat) + 
+                geom_bar(aes(x=value, y=response), stat='identity') +
+                geom_errorbar(aes(x=value, ymin=lower, ymax=upper), 
+                              width=0.2) +
+                ylim(low=0, high=1)
+            
+        } else {
+            rc <- ggplot(data=plotdat) + 
+                geom_line(aes(x=value, y=response)) +
+                geom_ribbon(aes(x=value, ymax=upper, ymin=lower), alpha=0.4) +
+                ylim(low=0, high=1)
+        }
         
     } else {
-        rc <- ggplot(data=plotdat) + geom_line(aes(x=variable, y=response)) +
-            geom_ribbon(aes(x=variable, ymax=upper, ymin=lower), alpha=0.4)
+        rc <- plotdat
     }
     
+    print(8)
     
     
     return(rc)
