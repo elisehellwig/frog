@@ -18,8 +18,10 @@ rasi <- convertFactors(rasi)
 BioIDs <- c(1,4,5,10,11,12,15,18,19)
 dropBioIDs <- setdiff(1:19, BioIDs)
 dropBios <- paste0('bio', dropBioIDs)
-
 rasi <- rasi %>% select(-c(dropBios))
+
+
+#rasip <- rasi[rasi$perennial=='1', ]
 #rasi <- rasi %>% select(c(1, 32:39, 2:31, 40:50))
 
 # Run Fullest model------------------------------------------------------
@@ -35,8 +37,10 @@ mefullcv <- crossval(rasi, seed=203943, threshold=0.6,
                      arguments=c("defaultprevalence=0.73", 
                                  "lq2lqptthreshold=50"))
 
+fullresults <- mefull@results[,11]
 
-
+contrib <- extractResults(mefull,'.contribution', 10)
+varimp <- extractResults(mefull,'.permutation.importance',10)
 
 # First variable selection ---------------------------------------------------
 
