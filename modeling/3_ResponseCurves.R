@@ -26,19 +26,28 @@ r <- convertFactors(rr, exclude='rasi')
 
 #subsetting data to be only some variables 
 rasi <- rasi0 %>% select(vars) 
+rasi$bio11 <- rasi$bio11/10
+
+# Running the model -------------------------------------------------------
+
+
 
 
 # Response curves ---------------------------------------------------------
 
-# numvars <- vars[c(3,6:12)]
-# chrvars <- vars[c(2,4,5)]
-# 
-# rcsNumeric <- ldply(numvars, function(var) {
-#     d <- responseCurve(rasi, var, 50, 30, 23882929, plot=FALSE)
-#     d$variable <- var
-#     d
-# })
-# 
+ numvars <- vars[c(3,6:12)]
+ chrvars <- vars[c(2,4,5)]
+ 
+ rcsNumeric <- ldply(numvars, function(var) {
+     d <- data.frame(response(mod, var, expand=0, at=median))
+     d$variable <- var
+     names(d)[1:2] <- c('value','response')
+     d
+ })
+
+ 
+ 
+ # 
 # write.csv(rcsNumeric, file.path(datapath, 'results/responseNum.csv'),
 #           row.names = FALSE)
 # 
@@ -55,9 +64,10 @@ rasi <- rasi0 %>% select(vars)
 la <- responseCurve(rasi, 'waterbodies', 1000, 30, 23882929)
 
 
-g <- ggplot(data=la) +
+nplot <- ggplot(data=rcsNumeric) +
     geom_line(aes(x=value, y=response)) +
-    geom_ribbon(aes(x=value, ymax=upper, ymin=lower), alpha=0.4)
+    facet_wrap(~variable, scales='free') +
+    scale_y_continuous(limits = c(0, 1))
 
 rn <- read.csv( file.path(datapath, 'results/responseNum.csv'))
 rc <- read.csv( file.path(datapath, 'results/responseChr.csv'))
@@ -66,10 +76,10 @@ rn$valueScaled <- as.numeric(scale_by(value ~ variable, data=rn))
 
 nplot <- ggplot(data=rn) + 
     geom_line(aes(x=valueScaled, y=response)) +
-    geom_ribbon(aes(x=valueScaled, ymax=upper, ymin=lower), alpha=0.4) +
     facet_wrap( ~ variable)
 
-
+nplot <- ggplot(data=rn[rn$variable=='waterbodies', ]) + 
+    geom_line(aes(x=(value)^2, y=response)) 
 
 rcs$value <- as.numeric(rcs$value)
 
