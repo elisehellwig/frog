@@ -146,9 +146,9 @@ for (i in 1:length(chrlevs)) {
         labs(y='Probability of Occupancy', x='') 
     
     path <- file.path(datapath, 'results/plots/response/individualplots',
-                      paste0(filenames[i], '.tiff'))
+                      paste0(chrfiles[i], '.tiff'))
     
-    ggsave(path, plot=numplot, width=5, height=3)
+    ggsave(path, plot=numplot, width=3, height=3)
 }
 
 
