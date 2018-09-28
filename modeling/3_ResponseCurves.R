@@ -137,7 +137,7 @@ rchr$value <- c('Not Dense','Dense', 'Not Disturbed',
 chrfiles <- c('disturbed','dense','hardwood')
 
 for (i in 1:length(chrlevs)) {
-    chrplot <- ggplot(data=rchr) +
+    chrplot <- ggplot(data=rchr[rchr$variable==chrlevs[i],]) +
         geom_bar(aes(x=value,y=prob), stat='identity') +
         geom_errorbar(aes(x=value, ymin=lower, ymax=upper), width=0.2) +
         facet_wrap(~variable) +
@@ -148,7 +148,7 @@ for (i in 1:length(chrlevs)) {
     path <- file.path(datapath, 'results/plots/response/individualplots',
                       paste0(chrfiles[i], '.tiff'))
     
-    ggsave(path, plot=numplot, width=3, height=3)
+    ggsave(path, plot=chrplot, width=3, height=3)
 }
 
 
