@@ -31,6 +31,10 @@ metric <- function(predicted, observed, type='accuracy') {
         
     } else if (type=='TruePos') {
         met <- tab[2,2]
+        
+    } else if (type=='omission') {
+        met <- tab[1,2]/sum(tab[1,])
+        
     } else {
         stop('Metric type given is not recognized.')
     }
@@ -79,14 +83,23 @@ crossval <- function(df, errormetric='PPV', k=5, seed=NA, avg=TRUE,
                           p=train$rasi)
         }
        
-        
-        testprediction <- predictPres(mod, test, threshold)
-        
-        
-        
-        error[i,] <- sapply(errormetric, function(met) {
-            metric(testprediction, test$rasi,type=met)
-        })
+        if (errormetric[1]=='COR') {
+            
+            testprob <- predict(mod, test)
+            
+            error[i,] <- cor(testprob, test$rasi)
+            
+        } else {
+           
+            testprediction <- predictPres(mod, test, threshold)
+            
+            
+            
+            error[i,] <- sapply(errormetric, function(met) {
+                metric(testprediction, test$rasi,type=met)
+            })
+             
+        }
         
     } 
     
@@ -106,10 +119,21 @@ FtoN <- function(v) {
     return(n)
 }
 
-extractResults <- function(mod, output) {
+extractResults <- function(mod, output, reps=NA) {
     
-    allresults <- mod@results
-    allresultnames <- attributes(allresults)$dimnames[[1]]
+    if (!is.na(reps)) {
+        allresults <- mod@results[,(reps+1)]
+        allresultnames <- attributes(allresults)$names
+        
+    } else {
+        allresults <- mod@results
+        allresultnames <- attributes(allresults)$dimnames[[1]]
+    }
+    
+    #print(head(allresults))
+    
+    
+    #print(head(allresultnames))
     ids <- grep(output, allresultnames, ignore.case = TRUE)
 
     if (length(dim(allresults))==0) {
