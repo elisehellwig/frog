@@ -81,47 +81,76 @@ rci2 <- rci[-badlengths,]
 
 rm <- merge(rci2, m, by=c('variable','value'))
 
-levels(rm$variable) <- c('Disturbed Soil','Bio 11: Mean Winter Temp',
+levels(rm$variable) <- c('Disturbed Soil','Mean Winter Temperature (Bio 11)',
                          'Dense Canopy Cover','Hardwood Forest',
-                         'Stream Length', 'Number of Meadows',
-                         'Mean Gradient','Stream Order',
-                         'Total Drainage Area (sqrt)', 
-                         'Number of Waterbodies (sqrt)',
+                         'Stream Length', 'Nearby Meadows (within 1 km)',
+                         'Mean Slope','Modified Strahler Stream Order',
+                         'Total Cumulative Drainage Area', 
+                         'Nearby Bodies of Water (within 1 km)',
                          'Longitude')
 
 numlevs <- levels(rm$variable)[c(2, 5:11)]
 chrlevs <- levels(rm$variable)[c(1,3:4)]
-# make plots --------------------------------------------------------------
-
 
 rnum <- rm[rm$variable %in% numlevs, ]
 rchr <- rm[rm$variable %in% chrlevs, ]
+# make num plot ------------------------------------------------------------
+
+filenames <- c('bio11', 'length', 'meadows', 'slope','streamOrder',
+               'totDrainArea','waterbodies','x')
+
+xlabels <- c('Temperature (Degrees C)', 'Length (km)', 'Number of Meadows',
+             'Percent Slope', 'Stream Order',
+             expression(sqrt('km'^2)), 
+             expression(sqrt('Number of Waterbodies')),
+             'Longitude (degrees)')
+
+
+for (i in 1:length(numlevs)) {
+    numplot <- ggplot(data=rnum[rnum$variable==numlevs[i], ]) + 
+        geom_line(aes(x=value, y=prob)) +
+        geom_ribbon(aes(x=value, ymax=upper, ymin=lower), alpha=0.4) +
+        ylim(c(0,1)) + 
+        theme_bw(8) + 
+        labs(x=xlabels[i],y='Probability of Occupancy', title=numlevs[i]) +
+        theme(plot.title = element_text(hjust = 0.5))
+    
+    if (i==4) {
+        numplot <- numplot + scale_x_continuous(labels = scales::percent)
+    }
+    
+    
+    path <- file.path(datapath, 'results/plots/response/individualplots',
+                      paste0(filenames[i], '.tiff'))
+    
+    ggsave(path, plot=numplot, width=5, height=3)
+}
+
+
+
+# make chr plot -----------------------------------------------------------
+
 rchr$value <- c('Not Dense','Dense', 'Not Disturbed',
-                   'Disturbed','Not Hardwood','Hardwood')
+                'Disturbed','Not Hardwood','Hardwood')
 
-numplot <- ggplot(data=rnum) + 
-    geom_line(aes(x=value, y=prob)) +
-    geom_ribbon(aes(x=value, ymax=upper, ymin=lower), alpha=0.4) +
-    facet_wrap(~variable, scales='free_x') + 
-    ylim(c(0,1)) + 
-    theme_bw(10) + 
-    labs(x='Variable Value',y='Probability of Occupancy')
+
+chrfiles <- c('disturbed','dense','hardwood')
+
+for (i in 1:length(chrlevs)) {
+    chrplot <- ggplot(data=rchr) +
+        geom_bar(aes(x=value,y=prob), stat='identity') +
+        geom_errorbar(aes(x=value, ymin=lower, ymax=upper), width=0.2) +
+        facet_wrap(~variable) +
+        ylim(low=0, high=1) +
+        theme_bw(8) +
+        labs(y='Probability of Occupancy', x='') 
     
-
-ggsave(file.path(datapath,'results/plots/response/NumericResponse.tiff'),
-       plot=numplot)
-
-
-chrplot <- ggplot(data=rchr) +
-    geom_bar(aes(x=value,y=prob), stat='identity') +
-    geom_errorbar(aes(x=value, ymin=lower, ymax=upper), width=0.2) +
-    facet_wrap(~variable, scales='free_x') +
-    ylim(low=0, high=1) +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-    theme_bw(10) +
-    labs(y='Probability of Occupancy', x='') 
+    path <- file.path(datapath, 'results/plots/response/individualplots',
+                      paste0(filenames[i], '.tiff'))
     
-ggsave(file.path(datapath,'results/plots/response/CategoricalResponse.tiff'),
-       plot=chrplot)
+    ggsave(path, plot=numplot, width=5, height=3)
+}
+
+
 
 
