@@ -47,7 +47,9 @@ meanMode <- function(v) {
 
 
 
-responseVals <- function(x, y, models, varname, nstep=10, confidence=NA) {
+responseVals <- function(model, varname, nstep=10, confidence=NA) {
+    
+    
     
     varid <- which(names(x)==varname)
     var <- x[,varid]
@@ -118,14 +120,15 @@ responseCurve <- function(data, var, reps, nstep, seed=NA, conf=0.95,
                args=c("defaultprevalence=0.73", "lq2lqptthreshold=50"))
     })
     
+    cidf <- lapply(modlist, function(m) {
+        d <- data.frame(unique(response(m, var, expand=0)))
+        d
+    })
     
     print(4)
-    df <- responseVals(data[,-1], data$rasi, originalmod, 
-                       var, nstep=nstep)
+    df <- data.frame(response(originalmod, var))
     
     print(5)
-    cidf <- responseVals(data[,-1], data$rasi, modlist, var, nstep=nstep,
-                         confidence=conf)[,2:3]
     
     plotdat <- data.frame(cbind(df, cidf))
     
@@ -163,4 +166,31 @@ responseCurve <- function(data, var, reps, nstep, seed=NA, conf=0.95,
     return(rc)
     
 }
+
+
+bootCI <- function(df, confidence=0.95, varname='variable') {
+    
+    print(varname)
+    
+    lc <- (1-confidence)/2
+    uc <- (1-confidence)/2 + confidence
+    
+    bins <- sort(unique(df[,'x']))
+    #print(bins)
+    
+    
+    dists <- lapply(bins, function(n) {
+        df[df$x==n,'y']
+    })
+    
+    CIs <- data.frame(variable=varname,
+                      value=bins,
+                      lower=sapply(dists, function(d) quantile(d, probs=lc)),
+                      upper=sapply(dists, function(d) quantile(d, probs=uc)))
+    
+    
+}
+
+
+
 
