@@ -140,10 +140,10 @@ for (i in 1:length(chrlevs)) {
     chrplot <- ggplot(data=rchr[rchr$variable==chrlevs[i],]) +
         geom_bar(aes(x=value,y=prob), stat='identity') +
         geom_errorbar(aes(x=value, ymin=lower, ymax=upper), width=0.2) +
-        facet_wrap(~variable) +
         ylim(low=0, high=1) +
         theme_bw(8) +
-        labs(y='Probability of Occupancy', x='') 
+        labs(y='Probability of Occupancy', x='', title=chrlevs[i]) +
+        theme(plot.title = element_text(hjust = 0.5))
     
     path <- file.path(datapath, 'results/plots/response/individualplots',
                       paste0(chrfiles[i], '.tiff'))
