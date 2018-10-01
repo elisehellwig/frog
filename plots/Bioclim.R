@@ -144,27 +144,3 @@ for (i in 12:19) {
     
     save_tmap(bioplot, filename=biopath)
 }
-# Bio11 by Forest -------------------------------------------------------
-
-bio11 <- bioR$bio11/10
-
-png(file.path(datapath, 'results/plots/bio11.tiff'))
-    par(bty='n')
-    plot(bio11, col=temppal(255), axes=FALSE, bty='n',
-        main='Mean Temperature of Coldest Quarter (degrees C)',
-        sub='Black=Presence, Absence: Red = Lassen, Green = Plumas, Purple = Tahoe')
-    plot(rsf[[1]], col='red',add=TRUE)
-    plot(rsf[[2]], col='green4',add=TRUE)
-    plot(rsf[[3]], col='purple',add=TRUE)
-    plot(pres, lwd=2, add=TRUE)
-dev.off()
-# Bio11 by presence/absence -------------------------------------------------
-
-bio11 <- bioR$bio11/10
-plot(bio11, col=temppal(255), axes=FALSE,
-     main='Mean Temperature of Coldest Quarter', 
-     sub='Purple = R. sierrae present')
-plot(pres, col='purple2', add=TRUE, lwd=2.5)
-plot(abse, add=TRUE, lwd=0.5)
-
-
