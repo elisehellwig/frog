@@ -44,6 +44,8 @@ bta <- spTransform(bound, crs(r))
 
 bb <- extent(c(-165600, -200, 140000, 267200))
 bb2 <- extent(c(-165700 , -454, 137000, 259000))
+bb3 <- extent(c(-165700 , -454, 137000, 255000))
+
 
 fta2 <- crop(fta, bb2)
 fta3 <- remove.holes(remove.holes(fta2))
@@ -83,17 +85,20 @@ fta3$Forest <- c("Plumas", "Lassen","Tahoe")
 # tmap -------------------------------------------------------------------
 
 
+maptitle <- expression(paste('Probability of Stream Occupancy for ',
+                              italic('Rana sierrae')))
 
 allprob <- tm_shape(fta3, bbox=bb, is.master = TRUE) + 
-    tm_fill(col='Forest', palette=forestcols, title='National Forest') +
+    tm_fill(col='Forest', palette=forestcols, 
+            title='National Forest') +
     tm_shape(r) + 
     tm_lines(col='Probability', lwd=1.5, palette = probpal(10)) +
     tm_shape(bta) +
     tm_borders(col='black', lwd=3) +
-    tm_layout(title='Probability of Stream Occupancy for R. sierrae',
-              legend.bg.color="grey87", legend.width = -0.2)
+    tm_layout(title=maptitle, legend.bg.color="grey87", legend.width = -0.2)
 
-allfn <- file.path(datapath, 'results/plots/occupancy/allprobabilities.tiff')
+allfn <- file.path(datapath, 
+           'results/plots/occupancy/allprobabilities2.tiff')
 save_tmap(allprob, filename = allfn)
 
 
