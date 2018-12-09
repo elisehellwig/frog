@@ -5,12 +5,14 @@ datapath <- '/Volumes/GoogleDrive/My Drive/OtherPeople/frogData/data'
 
 
 rs <- readRDS(file.path(datapath, 'processed/RasiStreamLinesFinal.RDS'))
+alt <- getData('alt', country='USA',  res=0.5, lon=-121, lat=39)
 bio <- getData('worldclim', var='bio', res=0.5, lon=-121, lat=39)
 names(bio) <- gsub('_11', '', names(bio))
 
 heatpal <- colorRampPalette(brewer.pal(9, 'YlOrRd'))
 temppal <- colorRampPalette(rev(brewer.pal(9, 'RdYlBu')))
 precippal <- colorRampPalette(brewer.pal(9, 'Blues'))
+
 
 # Process data -----------------------------------------------------------
 
@@ -28,6 +30,7 @@ forestExtents <- lapply(rsf, function(f) {
 
 bb <- extent(-121.57, -120.02, 39.25, 40.35)
 bioR <- crop(bio, bb)
+altR <- crop(alt[[1]], bb)
 
 biovars <- paste0('bio',1:19)
 unitconv <- c(0.1, 0.1, 0.01, 0.01, rep(0.1, 7), rep(1, 8) )
@@ -87,10 +90,12 @@ biobreaks <- list(seq(0, 20, by=10), seq(10, 20, by=5),
 pals <- c(rep('seq', 5), 'div','seq','div','seq','div','div')
 
 precipR <- subset(bioR, subset=12:19)
-# Plotting Temp ---------------------------------------------------------
 
 forestpal <- c('deepskyblue','forestgreen', 'purple')
 forestpal2 <- c('darkorange3','forestgreen', 'purple')
+
+# Plotting Temp ---------------------------------------------------------
+
 
 
 bb <- extent()
@@ -144,3 +149,30 @@ for (i in 12:19) {
     
     save_tmap(bioplot, filename=biopath)
 }
+
+
+
+# Plotting altitude -------------------------------------------------------
+
+names(altR) <- 'elevation'
+
+altplot <- tm_shape(altR) +
+    tm_raster(col='elevation', palette='seq', style='cont',
+              breaks=c(0, 900, 1800, 2700), alpha=0.7, 
+              title='Elevation (m)') +
+    tm_shape(pres) +
+    tm_lines(col='black', lwd=1.5) +
+    tm_shape(abse) +
+    tm_lines(col='forest', palette=forestpal2, 
+             lwd=1.5, title.col='National Forest') +
+    tm_layout(main.title='Elevation (presence in black)', 
+              aes.palette = list(seq='Blues'),
+              legend.position = c('left', 'bottom'),
+              legend.bg.color="grey87", legend.width = -0.2,
+              legend.height = -0.4, legend.title.size = 0.8,
+              title.size = 0.5)
+
+
+altpath <- file.path(datapath, 'results/plots/bioclim/elevation.tiff')
+save_tmap(altplot, filename=altpath)
+
