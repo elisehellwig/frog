@@ -25,7 +25,7 @@ p <- ggplot(data=cvm) +
          y='Metric Value') +
     theme_bw(6) 
 
-tiff(file.path(datapath, 'results/plots/ErrorCurve.tiff'), width = 900,
-     res=300)
+tiff(file.path(datapath, 'results/plots/ErrorCurve.tiff'), width = 600,
+     height=400, res=300)
     p
 dev.off()
