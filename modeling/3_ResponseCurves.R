@@ -97,7 +97,7 @@ chrvars <- c('Disturbed','dense','hardwood')
 
 rm <- read.csv(file.path(datapath, 'results/ResponseData.csv'))
 
-levels(rm$variable)[7] <- 'Stream Reach Length'
+rm$variable <- revalue(rm$variable, c('Stream Length'='Stream Reach Length'))
 
 numlevs <- levels(rm$variable)[c(4:11)]
 chrlevs <- levels(rm$variable)[c(1:3)]
@@ -112,6 +112,7 @@ filenames <- c('x', 'slope', 'bio11', 'streamOrder', 'waterbodies',
 xlabels <- c('Longitude (degrees)', 'Percent Slope', 'Temperature (Degrees C)',
              'Stream Order', expression(sqrt('Number of Waterbodies')),
              'Number of Meadows','Length (km)', expression(sqrt('km'^2))) 
+
 
 
 for (i in 1:length(numlevs)) {
