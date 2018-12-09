@@ -4,7 +4,7 @@ This repository is the code repository for a maximum entropy species distributio
 
 All data is stored in frogData/data. Documentation for the data can be found in frogData/documentation.
 
-__Required R Packages:__ dismo, ggplot2, raster, rgdal, rgeos, rJava, sp
+__Required R Packages:__ dismo, ggplot2, raster, rgdal, rgeos, rJava, sp, tmap
 
 ## Files
 
@@ -107,7 +107,7 @@ runs a number of models, some with more variables, some with less, to try and ge
  * Input files: 
 
  	* processed/RasiModelDF.csv
- 	* results/DroppedVariables.RDS
+ 	* results/SelectedVariables.csv
  	* results/RasiResultsDF.csv
 
 
@@ -118,10 +118,36 @@ runs a number of models, some with more variables, some with less, to try and ge
  	 * results/CrossValidationModelFinal.csv
 
 
-__3_ResponseCurves.R__ This 
+__3_ResponseCurves.R__ This script takes response data that was outputted by the Java maxent program and creates response curves for each of the variables in the final model. It does do plotting, but since there is quite a bit of model result manipulation in this file, I decided to put it in the modeling folder.
+
+ * Input files:
+
+ 	* results/SelectedVariables.csv
+ 	* processed/RasiModelDF.csv
+ 	* All files in the directory maxent/bootstrap1000/
+ 	* All files in the directory maxent/FullModel/plots/
+
+ * Output files: all the plots in the directory results/plots/response/individualplots/.  
+
 
 
 ### Plots
 
+
+__SummaryStats.R__ This script plots histograms and density plots for all of the variables in the data set using ggplot2. It only plots the data that are above 1524m (5000 ft), because those are the data that are used in the model. Some of the variables are transformed to reduce the influence of high leverage points, and 3 high leverage points are removed. The plots are all saved as pngs.
+
+ * Input file: processed/RasiStreamDF.csv
+
+ * Output files: all files in the directory results/plots/summary/
+
+
+__Bioclim.R__ This script plots all of the bioclim variables along with the stream locations, national forest of those streams and whether or not the streams are occupied. It uses the tmap package to do the plotting and saving.
+
+ * Input files: 
+
+ 	* processed/RasiStreamLinesFinal.RDS
+ 	* Bioclim data corresponding to the following getData call if no internet is available ( getData('worldclim', var='bio', res=0.5, lon=-121, lat=39))
+
+ * Output files: 
 
 
