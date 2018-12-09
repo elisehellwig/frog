@@ -1,7 +1,7 @@
 
 # Setup -------------------------------------------------------------------
 
-
+library(dplyr)
 library(ggplot2)
 
 datapath <- '/Volumes/GoogleDrive/My Drive/OtherPeople/frogData/data'
@@ -34,17 +34,16 @@ rasi$divDrainArea <- sqrt(rasi$divDrainArea)
 #managing factors
 rasi$rasi <- factor(rasi$rasi)
 rasi$streamOrder <- factor(rasi$streamOrder)
-rasi$treesize <- factor(rasi$treesize)
+rasi$treesize <- as.factor(recode(rasi$treesize, `0`='No Trees', 
+                                  `1`='Small Trees', `2`='Small Trees',
+                                  `3`='Small Trees',`4`='Large Trees',
+                                  `5`='Large Trees', `6`='Large Trees'))
 
-levels(rasi$treesize) <- c('Unvegetated', 'Seedling – DBH < 1 in',
-                           'Sapling – DBH 1 to 6 in', 'Pole – DBH 6 to 11 in', 
-                           'Small tree – DBH 11 to 24 in',
-                           'Medium/Large – DBH > 24 in',
-                           'Multi Layered – DBH > 11 in, closure > 60%')
-
-levels(rasi$canopyClosure) <- c('Dense','Moderate','Partial','Sparse','Open')
+levels(rasi$canopyClosure) <- c('Dense','Moderate','Open','Sparse','None')
 rasi$canopyClosure <- factor(rasi$canopyClosure,
                              levels(rasi$canopyClosure)[5:1])
+levels(rasi$habitat) <- c('Conifer','Hardwood','Herbaceous','Mixed Forest',
+                          'Not Vegetated','Shrub')
 
 rasi <- rasi[rasi$elevmax>1524, ]
 
@@ -54,9 +53,9 @@ vars <- allvars[ c(4, 6, 9:44)]
 titles <- c('Stream Reach Length','Mean Elevation', 'Mean Slope', 
             'Stream Seasonality', 'Modified Strahler Stream Order', 
             'Bedrock Class', 'Soil Type', 
-            'Wildlife Habitat Relationship (WHR) Type', 'Tree Age Class',
-            'Canopy Closure', 'Total Upstream Cumulative Drainage Area',
-            'Divergence-Routed Cumulative Drainage Area', 
+            'Wildlife Habitat Relationship\n(WHR) Type', 'Tree Age Class',
+            'Canopy Closure', 'Total Upstream Cumulative\nDrainage Area',
+            'Divergence-Routed Cumulative\nDrainage Area', 
             'Longitude', 'Latitude', 'Rock Type', 'Nearby Meadows',
             'Nearby Bodies of Water', 'Mean Reach Aspect',
             'National Forest',
@@ -66,16 +65,16 @@ titles <- c('Stream Reach Length','Mean Elevation', 'Mean Slope',
             'BIO 6: Min Temp of Coldest Month', 'BIO 7: Annual Temp Range',
             'BIO 8: Mean Temp of Wettest Quarter',
             'BIO 9: Mean Temp of Driest Quarter',
-            'BIO 10: Mean Temp of Warmest Quarter',
-            'BIO 11: Mean Temp of Coldest Quarter', 
+            'BIO 10: Mean Temp of Warmest\nQuarter',
+            'BIO 11: Mean Temp of Coldest\nQuarter', 
             'BIO 12: Annual Precipitation',
-            'BIO 13: Precipitation of Wettest Month', 
-            'BIO 14: Precipitation of Driest Month',
+            'BIO 13: Precipitation in Wettest Month', 
+            'BIO 14: Precipitation in Driest Month',
             'BIO 15: Precipitation Seasonality',
-            'BIO 16: Precipitation of Wettest Quarter',
-            'BIO 17: Precipitation of Driest Quarter',
-            'BIO 18: Precipitation of Warmest Quarter',
-            'BIO 19: Precipitation of Coldest Quarter')
+            'BIO 16: Precipitation in Wettest\nQuarter',
+            'BIO 17: Precipitation in Driest\nQuarter',
+            'BIO 18: Precipitation in Warmest\nQuarter',
+            'BIO 19: Precipitation in Coldest\nQuarter')
 
 xlabels <- c('Length (km)', 'Elevation (m)', 'Slope (radians)',  '', 
              'Stream Order', '', '', '', 'Age Class', '',
@@ -92,16 +91,21 @@ xlabels <- c('Length (km)', 'Elevation (m)', 'Slope (radians)',  '',
              'Precipitation (mm)', 'Precipitation (mm)', 'Precipitation (mm)',
              'Precipitation (mm)','Precipitation (mm)','Precipitation (mm)')
 
+#length(vars)
 
 plotlist <- lapply(1:length(vars), function(i) {
-    print(vars[i])
-    summaryPlot(rasi, vars[i], xlab=xlabels[i], plotTitle=titles[i])
+    #print(vars[i])
+    summaryPlot(rasi, vars[i], xlab=xlabels[i], plotTitle=titles[i],
+                size=25,
+                legend = expression(italic('R. sierrae')))
 })
 
 for (i in 1:length(vars)) {
-    filename <- file.path(datapath, 'results/plots/summary', 
-                         paste0(vars[i], '.png'))
-    png(filename, width=600)
+    #width must be set to 1050 for i=6 (bedrock)
+    print(vars[i])
+    filename <- file.path(datapath, 'results/plots/summary2', 
+                         paste0(vars[i], '.tiff'))
+    tiff(filename, width=600)
        print(plotlist[[i]])
     dev.off()
 }
