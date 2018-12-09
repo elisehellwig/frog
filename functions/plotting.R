@@ -4,7 +4,11 @@ summaryPlot <- function(df, var, groupvar='rasi', type='density', size=12,
                         legend='R. Sierrae', width=NULL,
                         xlab='X', alignment=0.5) {
     
-    if (!is.factor(df[,groupvar])) {
+    if (is.na(groupvar)) {
+        df$gv <- 1
+        df$gv <- as.factor(df$gv)
+                
+    } else if (!is.factor(df[,groupvar])) {
         df[,groupvar] <- factor(df[,groupvar])
     }
 
@@ -25,28 +29,56 @@ summaryPlot <- function(df, var, groupvar='rasi', type='density', size=12,
         ylab <- 'Proportion'
     }
     
+    df$var <- df[, var]
+    
     splot <- ggplot(df)
     
     if (class=='categorical') {
-        splot <- splot + geom_bar(aes_string(x=var, y='..prop..', fill=groupvar, 
-                                             group=groupvar))
+        
+        if (is.na(groupvar)) {
+            splot <- splot + geom_bar(aes(x=var, (..count..)/sum(..count..)))
+            
+        } else {
+            splot <- splot + geom_bar(aes_string(x=var, '..prop..', 
+                                                 fill=groupvar, 
+                                                 group=groupvar))
+        }
+        
         
     } else if (type=='density') {
         
-        splot <- splot + 
-            geom_density(aes_string(x=var, fill=groupvar, group=groupvar),
-                         alpha=alph) 
+        if (is.na(groupvar)) {
+            splot <- splot + 
+                geom_density(aes_string(x=var), alpha=alph) 
+            
+        } else {
+            splot <- splot + 
+                geom_density(aes_string(x=var, fill=groupvar, group=groupvar),
+                             alpha=alph) 
+        }
+    
         
     } else {
-        splot <- splot + geom_histogram(aes_string(x=var, fill=groupvar,
-                                                   group=groupvar),
-                                        position='identity', alpha=alph,
-                                        binwidth = width)
+        
+        if (is.na(groupvar)) {
+            splot <- splot + geom_histogram(aes_string(x=var),
+                                            position='identity', alpha=alph,
+                                            binwidth = width)
+        } else {
+            splot <- splot + geom_histogram(aes_string(x=var, fill=groupvar,
+                                                       group=groupvar),
+                                            position='identity', alpha=alph,
+                                            binwidth = width)
+        }
+        
     }
 
-    splot <- splot + theme_bw(size) + 
-        scale_fill_manual(values=colorpal, labels=classes, name=legend) +
-        labs(x=xlab, y=ylab, title=plotTitle)
+    if (!is.na(groupvar)) {
+        splot <- splot + scale_fill_manual(values=colorpal, labels=classes, 
+                                           name=legend)
+    }
+    
+    splot <- splot + theme_bw(size) + labs(x=xlab, y=ylab, title=plotTitle)
     
     if (maxchar>5) {
         splot <- splot + 
